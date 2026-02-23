@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [ main, develop ]
   push:
-    branches: [ main, develop, 1-feat-code-qualityyml-추가 ]
+    branches: [ main, develop]
 
 jobs:
   build-and-run-metrics:
