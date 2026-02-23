@@ -119,6 +119,15 @@ ktlint {
 	}
 }
 
+// ktlint을 build/check 라이프사이클에서 분리.
+// ktlint 검사는 CI code-quality 워크플로우에서 ./gradlew ktlintCheck로,혹은 code-quality.yml으로 단독 실행
+afterEvaluate {
+	val checkTask = tasks.findByName("check") ?: return@afterEvaluate
+	checkTask.setDependsOn(
+		checkTask.dependsOn.filterNot { it.toString().contains("ktlint", ignoreCase = true) },
+	)
+}
+
 detekt {
 	config.setFrom("config/detekt/detekt.yml")
 	buildUponDefaultConfig = true
