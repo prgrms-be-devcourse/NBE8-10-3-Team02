@@ -1,0 +1,171 @@
+name: Migration Metrics
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop, 1-feat-code-qualityyml-추가 ]
+
+jobs:
+  build-and-run-metrics:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Calculate migration metrics
+        id: metrics
+        run: |
+          echo "=== 마이그레이션 진행률 ===" > migration-report.txt
+
+          # 1. Migration Progress
+          JAVA_FILES=$(find src/main/java -name "*.java" 2>/dev/null | wc -l || echo 0)
+          KOTLIN_FILES=$(find src/main/kotlin -name "*.kt" 2>/dev/null | wc -l || echo 0)
+          TOTAL=$((JAVA_FILES + KOTLIN_FILES))
+
+          if [ $TOTAL -gt 0 ]; then
+            PROGRESS=$((KOTLIN_FILES * 100 / TOTAL))
+            echo "진행률: $PROGRESS% ($KOTLIN_FILES/$TOTAL 파일)" >> migration-report.txt
+            echo "migration_progress=$PROGRESS" >> $GITHUB_OUTPUT
+          else
+            echo "진행률: 0%" >> migration-report.txt
+            echo "migration_progress=0" >> $GITHUB_OUTPUT
+          fi
+
+          echo "" >> migration-report.txt
+
+          # 2. Null Safety Metrics
+          echo "=== Null Safety ===" >> migration-report.txt
+          BANG_COUNT=$(grep -r "!!" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          SAFE_CALL=$(grep -r "?\." src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          ELVIS=$(grep -r "?:" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+
+          echo "!! 연산자:          $BANG_COUNT" >> migration-report.txt
+          echo "안전 호출 (?.):     $SAFE_CALL" >> migration-report.txt
+          echo "엘비스 연산자 (?:): $ELVIS" >> migration-report.txt
+
+          echo "bang_count=$BANG_COUNT" >> $GITHUB_OUTPUT
+
+          if [ $((SAFE_CALL + ELVIS + BANG_COUNT)) -gt 0 ]; then
+            SAFETY_SCORE=$(((SAFE_CALL + ELVIS) * 100 / (SAFE_CALL + ELVIS + BANG_COUNT)))
+            echo "안전성 점수:        $SAFETY_SCORE%" >> migration-report.txt
+            echo "safety_score=$SAFETY_SCORE" >> $GITHUB_OUTPUT
+          else
+            echo "safety_score=0" >> $GITHUB_OUTPUT
+          fi
+
+          echo "" >> migration-report.txt
+
+          # 3. Kotlin Idioms
+          echo "=== Kotlin 관용 표현 ===" >> migration-report.txt
+          DATA_CLASS=$(grep -rP "\bdata class\b" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          SEALED_CLASS=$(grep -rP "\bsealed class\b" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          EXTENSION_FN=$(grep -rPE "\bfun [A-Za-z]+\." src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          WHEN_EXPR=$(grep -rP "when\s*\(" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+
+          echo "Data 클래스:        $DATA_CLASS" >> migration-report.txt
+          echo "Sealed 클래스:      $SEALED_CLASS" >> migration-report.txt
+          echo "확장 함수:          $EXTENSION_FN" >> migration-report.txt
+          echo "When 표현식:        $WHEN_EXPR" >> migration-report.txt
+
+          echo "" >> migration-report.txt
+
+          # 4. Code Reduction
+          echo "=== 코드 감소량 ===" >> migration-report.txt
+          JAVA_LINES=$(find src/main/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          JAVA_LINES=${JAVA_LINES:-0}
+          KOTLIN_LINES=$(find src/main/kotlin -name "*.kt" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          KOTLIN_LINES=${KOTLIN_LINES:-0}
+
+          echo "Java 라인 수:       $JAVA_LINES" >> migration-report.txt
+          echo "Kotlin 라인 수:     $KOTLIN_LINES" >> migration-report.txt
+
+          if [ "$JAVA_LINES" -gt 0 ] && [ "$KOTLIN_LINES" -gt 0 ]; then
+            if [ "$JAVA_LINES" -gt "$KOTLIN_LINES" ]; then
+              REDUCTION=$(((JAVA_LINES - KOTLIN_LINES) * 100 / JAVA_LINES))
+              echo "감소율:             $REDUCTION%" >> migration-report.txt
+            fi
+          fi
+
+          cat migration-report.txt
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('migration-report.txt', 'utf8');
+            const bangCount = parseInt('${{ steps.metrics.outputs.bang_count }}') || 0;
+            const progress = parseInt('${{ steps.metrics.outputs.migration_progress }}') || 0;
+            const safetyScore = parseInt('${{ steps.metrics.outputs.safety_score }}') || 0;
+
+            const progressBar = '\u2588'.repeat(Math.floor(progress / 5)) + '\u2591'.repeat(20 - Math.floor(progress / 5));
+
+            let safetyEmoji = '\uD83D\uDFE2';
+            if (bangCount > 10) safetyEmoji = '\uD83D\uDD34';
+            else if (bangCount > 5) safetyEmoji = '\uD83D\uDFE1';
+
+            const marker = '<!-- kotlin-migration-metrics -->';
+            const bangWarning = bangCount > 10
+              ? '\u26A0\uFE0F **\uACBD\uACE0**: `!!` \uC5F0\uC0B0\uC790\uAC00 ' + bangCount + '\uAC1C \uBC1C\uACAC\uB418\uC5C8\uC2B5\uB2C8\uB2E4. \uC548\uC804 \uD638\uCD9C(`?.`) \uB610\uB294 \uC5D8\uBE44\uC2A4 \uC5F0\uC0B0\uC790(`?:`)\uB97C \uC0AC\uC6A9\uD574 \uC8FC\uC138\uC694.'
+              : '';
+
+            const lines = [
+              marker,
+              '## \uD83D\uDCCA Kotlin \uB9C8\uC774\uADF8\uB808\uC774\uC158 \uBA54\uD2B8\uB9AD',
+              '',
+              '### \uD83D\uDE80 \uC9C4\uD589\uB960: ' + progress + '%',
+              '```',
+              progressBar + ' ' + progress + '%',
+              '```',
+              '',
+              '### \uD83D\uDEE1\uFE0F Null \uC548\uC804\uC131 \uC810\uC218: ' + safetyScore + '% ' + safetyEmoji,
+              bangWarning,
+              '',
+              '<details>',
+              '<summary>\uD83D\uDCCB \uC0C1\uC138 \uBA54\uD2B8\uB9AD \uBCF4\uAE30</summary>',
+              '',
+              '```',
+              report,
+              '```',
+              '',
+              '</details>',
+              '',
+              '---',
+              '\uD83D\uDCA1 **\uB354 \uB098\uC740 Kotlin \uCF54\uB4DC\uB97C \uC704\uD55C \uD301:**',
+              '- `!!` \uB300\uC2E0 `?.` \uB610\uB294 `?:` \uC0AC\uC6A9\uD558\uAE30',
+              '- DTO\uC5D0\uB294 `data class` \uC0AC\uC6A9\uD558\uAE30',
+              '- Builder \uD328\uD134 \uB300\uC2E0 named parameter \uC0AC\uC6A9\uD558\uAE30',
+              '- \uC720\uD2F8\uB9AC\uD2F0 \uD074\uB798\uC2A4 \uB300\uC2E0 \uD655\uC7A5 \uD568\uC218 \uC0AC\uC6A9\uD558\uAE30',
+            ];
+            const body = lines.join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            }
