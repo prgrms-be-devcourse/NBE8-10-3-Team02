@@ -13,6 +13,7 @@ import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import jakarta.validation.Valid;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,7 +69,7 @@ public class PostController {
             throw new ServiceException("401-1", "로그인이 필요합니다.");
         }
 
-        Member author = memberService.findById(actor.getId())
+        Member author = Optional.ofNullable(memberService.findById(actor.getId()))
                 .orElseThrow(() -> new ServiceException("404-1", "회원 정보를 찾을 수 없습니다."));
 
 
@@ -95,7 +96,7 @@ public class PostController {
         Post post = postService.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "해당 게시글을 찾을 수 없습니다."));
 
-        Member author = memberService.findById(actor.getId())
+        Member author = Optional.ofNullable(memberService.findById(actor.getId()))
                 .orElseThrow(() -> new ServiceException("404-1", "회원 정보를 찾을 수 없습니다."));
 
         postService.checkPermission(post, author);
@@ -116,7 +117,7 @@ public class PostController {
         Post post = postService.findById(id)
                 .orElseThrow(() -> new ServiceException("404-1", "해당 게시글을 찾을 수 없습니다."));
 
-        Member author = memberService.findById(actor.getId())
+        Member author = Optional.ofNullable(memberService.findById(actor.getId()))
                 .orElseThrow(() -> new ServiceException("404-1", "회원 정보를 찾을 수 없습니다."));
 
         postService.checkPermission(post, author);

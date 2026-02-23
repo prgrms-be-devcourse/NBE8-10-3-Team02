@@ -10,6 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -97,8 +98,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. accessToken이 실패했거나 없을 때 apiKey로 시도
         if (!apiKey.isBlank()) {
-            // ✅ 핵심: findByApiKey가 실패해도 .orElseThrow()를 하지 않습니다.
-            memberService.findByApiKey(apiKey).ifPresent(member -> {
+            Optional.ofNullable(memberService.findByApiKey(apiKey)).ifPresent(member -> {
                 setAuthentication(member.getId(), member.getEmail(), member.getNickname());
 
                 // 새 accessToken 발급 + 쿠키 갱신

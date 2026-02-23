@@ -6,6 +6,7 @@ plugins {
 	kotlin("jvm") version "2.1.0"
 	kotlin("plugin.spring") version "2.1.0"
 	kotlin("plugin.jpa") version "2.1.0"
+	kotlin("kapt") version "2.1.0"
 	id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
 	id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
@@ -34,6 +35,8 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	implementation("org.springframework.boot:spring-boot-starter-batch")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -64,9 +67,9 @@ dependencies {
 	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
 
 	// 2. QClass 생성을 위한 핵심 엔진 (이 3개가 세트입니다)
-	annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
-	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
-	annotationProcessor("jakarta.annotation:jakarta.annotation-api")
+	kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+	kapt("jakarta.persistence:jakarta.persistence-api")
+	kapt("jakarta.annotation:jakarta.annotation-api")
 
 	//caffeine
 	implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -102,6 +105,10 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+kapt {
+	keepJavacAnnotationProcessors = true
 }
 
 tasks.jacocoTestReport {

@@ -16,6 +16,7 @@ import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,7 +69,7 @@ public class ApiV1MemberGameController {
         if (memberId != rq.getActor().getId()){
             throw new ServiceException("401","Cannot add to this library");
         }
-        Member actor = memberService.findById(rq.getActor().getId()).orElseThrow();
+        Member actor = Optional.ofNullable(memberService.findById(rq.getActor().getId())).orElseThrow();
         Game game = gameService.findById(request.gameId()).orElseThrow(() -> new ServiceException("404-1", "No Game"));
         MemberGame memberGame = memberGameService.addToLibrary(request.platform(), request.playtime(), request.isFavorite(), request.status(), actor, game);
         memberService.flush();
@@ -114,7 +115,7 @@ public class ApiV1MemberGameController {
         if (memberId != actor.getId()){
             throw new ServiceException("401","Cannot delete from this library");
         }
-        Member member = memberService.findById(actor.getId()).orElseThrow();
+        Member member = Optional.ofNullable(memberService.findById(actor.getId())).orElseThrow();
         memberGameService.removeFromLibrary(member, memberGameId);
         memberService.flush();
         return new RsData<>(
