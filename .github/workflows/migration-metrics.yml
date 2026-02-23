@@ -79,6 +79,43 @@ jobs:
           echo "reduction=$REDUCTION"           >> $GITHUB_OUTPUT
           echo "reduction_rate=$REDUCTION_RATE" >> $GITHUB_OUTPUT
 
+      - name: Print metrics to stdout (push)
+        if: github.event_name == 'push'
+        run: |
+          S="${{ steps.metrics.outputs.migration_progress }}"
+          filled=$(( S / 5 ))
+          bar=$(printf '█%.0s' $(seq 1 $filled 2>/dev/null) ; printf '░%.0s' $(seq 1 $((20 - filled)) 2>/dev/null))
+
+          echo "========================================"
+          echo "  📊 Kotlin 마이그레이션 메트릭"
+          echo "========================================"
+          echo ""
+          echo "  🚀 진행률: $S%"
+          echo "  [$bar] $S%"
+          echo "  ${{ steps.metrics.outputs.migrated }} / ${{ steps.metrics.outputs.original_java_files }} 파일 완료"
+          echo ""
+          echo "  📁 파일 현황"
+          echo "  ┌─────────────────────────────┬───────┐"
+          echo "  │ 원본 Java 파일 (baseline)   │  ${{ steps.metrics.outputs.original_java_files }}  │"
+          echo "  │ 남은 Java 파일              │  ${{ steps.metrics.outputs.java_files }}  │"
+          echo "  │ 변환된 Kotlin 파일          │  ${{ steps.metrics.outputs.kotlin_files }}  │"
+          echo "  └─────────────────────────────┴───────┘"
+          echo ""
+          echo "  📉 코드 감소량"
+          echo "  ┌─────────────────────────────┬───────┐"
+          echo "  │ 마이그레이션 전 (baseline)  │ ${{ steps.metrics.outputs.original_java_lines }} │"
+          echo "  │ 현재 전체 라인 수           │ ${{ steps.metrics.outputs.current_total }} │"
+          echo "  │ 감소량                      │ ${{ steps.metrics.outputs.reduction }} 라인 (${{ steps.metrics.outputs.reduction_rate }}%) │"
+          echo "  └─────────────────────────────┴───────┘"
+          echo ""
+          echo "  🛡️  Null 안전성: ${{ steps.metrics.outputs.safety_score }}%"
+          echo "  !! 연산자: ${{ steps.metrics.outputs.bang_count }}  |  ?. 호출: ${{ steps.metrics.outputs.safe_call }}  |  ?: 엘비스: ${{ steps.metrics.outputs.elvis }}"
+          echo ""
+          echo "  🎯 Kotlin 관용 표현"
+          echo "  data class: ${{ steps.metrics.outputs.data_class }}  |  sealed class: ${{ steps.metrics.outputs.sealed_class }}  |  확장 함수: ${{ steps.metrics.outputs.extension_fn }}  |  when: ${{ steps.metrics.outputs.when_expr }}"
+          echo ""
+          echo "========================================"
+
       - name: Comment on PR
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
