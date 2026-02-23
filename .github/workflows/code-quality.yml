@@ -76,3 +76,67 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 60
+
+      - name: Print quality summary to stdout (push)
+        if: github.event_name == 'push' && always()
+        run: |
+          # ktlint 위반 건수
+          KTLINT_XML="build/reports/ktlint/ktlintMainSourceSetCheck/ktlintMainSourceSetCheck.xml"
+          if [ -f "$KTLINT_XML" ]; then
+            KTLINT_COUNT=$(grep -c "<error " "$KTLINT_XML" 2>/dev/null || echo 0)
+          else
+            KTLINT_COUNT="N/A (리포트 없음)"
+          fi
+
+          # detekt 위반 건수
+          DETEKT_XML="build/reports/detekt/detekt.xml"
+          if [ -f "$DETEKT_XML" ]; then
+            DETEKT_COUNT=$(grep -c "<error " "$DETEKT_XML" 2>/dev/null || echo 0)
+          else
+            DETEKT_COUNT="N/A (리포트 없음)"
+          fi
+
+          # jacoco 전체 커버리지
+          JACOCO_XML="build/reports/jacoco/test/jacocoTestReport.xml"
+          if [ -f "$JACOCO_XML" ]; then
+            COVERAGE=$(python3 - <<'EOF'
+import xml.etree.ElementTree as ET
+tree = ET.parse("build/reports/jacoco/test/jacocoTestReport.xml")
+for c in tree.getroot().findall("counter"):
+    if c.get("type") == "INSTRUCTION":
+        missed, covered = int(c.get("missed")), int(c.get("covered"))
+        total = missed + covered
+        print(f"{round(covered * 100 / total)}%" if total > 0 else "0%")
+        break
+EOF
+)
+          else
+            COVERAGE="N/A (테스트 미실행)"
+          fi
+
+          # 상태 표시
+          [ "$KTLINT_COUNT" = "0" ]  && KTLINT_STATUS="✅  0건"  || KTLINT_STATUS="❌  ${KTLINT_COUNT}건"
+          [ "$DETEKT_COUNT" = "0" ]  && DETEKT_STATUS="✅  0건"  || DETEKT_STATUS="❌  ${DETEKT_COUNT}건"
+          COV_NUM=$(echo "$COVERAGE" | tr -d '%')
+          if echo "$COV_NUM" | grep -qE '^[0-9]+$' && [ "$COV_NUM" -ge 70 ]; then
+            COV_STATUS="✅  $COVERAGE"
+          else
+            COV_STATUS="❌  $COVERAGE (기준: 70%)"
+          fi
+
+          echo "========================================"
+          echo "  📋 Code Quality 요약"
+          echo "========================================"
+          echo ""
+          echo "  🔍 정적 분석"
+          echo "  ┌──────────────┬────────────────────────┐"
+          printf "  │ %-12s │ %-22s │\n" "ktlint" "$KTLINT_STATUS"
+          printf "  │ %-12s │ %-22s │\n" "detekt" "$DETEKT_STATUS"
+          echo "  └──────────────┴────────────────────────┘"
+          echo ""
+          echo "  🧪 테스트 커버리지"
+          echo "  ┌──────────────┬────────────────────────┐"
+          printf "  │ %-12s │ %-22s │\n" "전체 커버리지" "$COV_STATUS"
+          echo "  └──────────────┴────────────────────────┘"
+          echo ""
+          echo "========================================"
