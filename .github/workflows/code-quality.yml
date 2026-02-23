@@ -36,33 +36,24 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # Kotlin 코드 스타일 체크 (ktlint) with ReviewDog
-      - name: Run ktlint with ReviewDog
-        uses: reviewdog/action-ktlint@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          level: warning
-          fail_on_error: false
-          ktlint_version: v1.0.1
+      # Kotlin 코드 스타일 체크 (ktlint)
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
+        continue-on-error: true
 
-      # Detekt with ReviewDog
-      - name: detekt
-        uses: reviewdog/action-detekt@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          level: warning
-          detekt_config: config/detekt/detekt.yml
+      # Detekt 정적 분석
+      - name: Run detekt
+        run: ./gradlew detekt
+        continue-on-error: true
 
       # Coverage
       - name: Test
         run: ./gradlew test jacocoTestReport
 
       - name: Coverage Report
-        uses: reviewdog/action-jacoco@v1
+        uses: madrapps/jacoco-report@v1.6.1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          jacoco_xml_path: build/reports/jacoco/test/jacocoTestReport.xml
-          reporter: github-check
-          min_coverage: 70
+          paths: build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 60

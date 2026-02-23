@@ -6,6 +6,8 @@ plugins {
 	kotlin("jvm") version "2.1.0"
 	kotlin("plugin.spring") version "2.1.0"
 	kotlin("plugin.jpa") version "2.1.0"
+	id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+	id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 group = "com"
@@ -104,6 +106,11 @@ tasks.jacocoTestReport {
 		xml.required = true
 		html.required = true
 	}
+}
+
+detekt {
+	config.setFrom("config/detekt/detekt.yml")
+	buildUponDefaultConfig = true
 }
 
 
