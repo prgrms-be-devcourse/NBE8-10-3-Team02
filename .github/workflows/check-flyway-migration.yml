@@ -1,0 +1,80 @@
+name: Check Flyway Migration
+
+on:
+  pull_request:
+    branches: [ develop, main ]
+    paths:
+      - 'src/main/resources/db/migration/**'
+
+permissions:
+  contents: read
+
+jobs:
+  check-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check naming convention (timestamp format)
+        run: |
+          MIGRATION_DIR="src/main/resources/db/migration"
+
+          # PR에서 새로 추가된 마이그레이션 파일만 체크
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD -- "$MIGRATION_DIR")
+
+          if [ -z "$NEW_FILES" ]; then
+            echo "새로 추가된 마이그레이션 파일 없음 - 건너뜁니다"
+            exit 0
+          fi
+
+          echo "새로 추가된 파일:"
+          echo "$NEW_FILES"
+          echo ""
+
+          FAILED=false
+          for FILE in $NEW_FILES; do
+            FILENAME=$(basename "$FILE")
+            # 올바른 형식: V20260223140532__설명.sql (스크립트로 생성)
+            if ! echo "$FILENAME" | grep -qE '^V[0-9]{14}__[a-zA-Z0-9_]+\.sql$'; then
+              echo "❌ 잘못된 파일명: $FILENAME"
+              echo "   파일은 스크립트로 생성해주세요: bash scripts/new-migration.sh \"설명\""
+              echo "   예시: V20260223140532__add_user_table.sql"
+              FAILED=true
+            else
+              echo "✅ $FILENAME"
+            fi
+          done
+
+          if [ "$FAILED" = true ]; then
+            exit 1
+          fi
+
+      - name: Check duplicate version numbers
+        run: |
+          MIGRATION_DIR="src/main/resources/db/migration"
+
+          # 전체 파일에서 버전 번호(__ 앞부분) 추출 후 중복 체크
+          VERSIONS=$(ls "$MIGRATION_DIR"/V*.sql 2>/dev/null \
+            | xargs -I{} basename {} \
+            | sed 's/__.*$//' \
+            | sort)
+
+          DUPLICATES=$(echo "$VERSIONS" | uniq -d)
+
+          if [ -n "$DUPLICATES" ]; then
+            echo "❌ 중복된 버전 번호 발견:"
+            echo "$DUPLICATES"
+            exit 1
+          fi
+
+          echo "✅ 중복된 버전 번호 없음"
+
+      - name: Discord 알림 (Flyway 검사 실패)
+        if: failure()
+        run: |
+          curl -s -H "Content-Type: application/json" \
+            -d "{\"embeds\":[{\"title\":\"Flyway 마이그레이션 검사 실패 ❌\",\"description\":\"**브랜치**: ${{ github.head_ref }}\\n**PR**: ${{ github.event.pull_request.title }}\\n**커밋**: ${{ github.sha }}\",\"color\":15158332}]}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
