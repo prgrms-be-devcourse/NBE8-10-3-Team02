@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main, develop ]
   push:
-    branches: [ main, develop, 1-feat-code-qualityyml-추가 ]
+    branches: [ main, develop ]
 
 jobs:
   code-quality:
@@ -110,7 +110,7 @@ jobs:
 
           # 상태 표시
           [ "$KTLINT_COUNT" = "0" ]  && KTLINT_STATUS="✅  0건"  || KTLINT_STATUS="❌  ${KTLINT_COUNT}건"
-          [ "$DETEKT_COUNT" = "0" ]  && DETEKT_STATUS="✅  0건"  || DETEKT_STATUS="❌  ${DETEKT_COUNT}건"
+          [ "$DETEKT_COUNT" = "00" ]  && DETEKT_STATUS="✅  0건"  || DETEKT_STATUS="❌  ${DETEKT_COUNT}건"
           COV_NUM=$(echo "$COVERAGE" | tr -d '%')
           if echo "$COV_NUM" | grep -qE '^[0-9]+$' && [ "$COV_NUM" -ge 70 ]; then
             COV_STATUS="✅  $COVERAGE"
