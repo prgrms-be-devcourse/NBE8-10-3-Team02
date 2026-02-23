@@ -122,30 +122,28 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const o = (key) => parseInt('${{ toJSON(steps.metrics.outputs) }}' === '' ? '0' : JSON.parse('${{ toJSON(steps.metrics.outputs) }}')[key]) || 0;
+            const progress      = parseInt('${{ steps.metrics.outputs.migration_progress }}')   || 0;
+            const origFiles     = parseInt('${{ steps.metrics.outputs.original_java_files }}')  || 0;
+            const javaFiles     = parseInt('${{ steps.metrics.outputs.java_files }}')           || 0;
+            const kotlinFiles   = parseInt('${{ steps.metrics.outputs.kotlin_files }}')         || 0;
+            const migrated      = parseInt('${{ steps.metrics.outputs.migrated }}')             || 0;
 
-            const progress      = o('migration_progress');
-            const origFiles     = o('original_java_files');
-            const javaFiles     = o('java_files');
-            const kotlinFiles   = o('kotlin_files');
-            const migrated      = o('migrated');
+            const bangCount     = parseInt('${{ steps.metrics.outputs.bang_count }}')           || 0;
+            const safeCall      = parseInt('${{ steps.metrics.outputs.safe_call }}')            || 0;
+            const elvis         = parseInt('${{ steps.metrics.outputs.elvis }}')                || 0;
+            const safetyScore   = parseInt('${{ steps.metrics.outputs.safety_score }}')         || 0;
 
-            const bangCount     = o('bang_count');
-            const safeCall      = o('safe_call');
-            const elvis         = o('elvis');
-            const safetyScore   = o('safety_score');
+            const dataClass     = parseInt('${{ steps.metrics.outputs.data_class }}')           || 0;
+            const sealedClass   = parseInt('${{ steps.metrics.outputs.sealed_class }}')         || 0;
+            const extensionFn   = parseInt('${{ steps.metrics.outputs.extension_fn }}')         || 0;
+            const whenExpr      = parseInt('${{ steps.metrics.outputs.when_expr }}')            || 0;
 
-            const dataClass     = o('data_class');
-            const sealedClass   = o('sealed_class');
-            const extensionFn   = o('extension_fn');
-            const whenExpr      = o('when_expr');
-
-            const origLines     = o('original_java_lines');
-            const javaLines     = o('java_lines');
-            const kotlinLines   = o('kotlin_lines');
-            const currentTotal  = o('current_total');
-            const reduction     = o('reduction');
-            const reductionRate = o('reduction_rate');
+            const origLines     = parseInt('${{ steps.metrics.outputs.original_java_lines }}')  || 0;
+            const javaLines     = parseInt('${{ steps.metrics.outputs.java_lines }}')           || 0;
+            const kotlinLines   = parseInt('${{ steps.metrics.outputs.kotlin_lines }}')         || 0;
+            const currentTotal  = parseInt('${{ steps.metrics.outputs.current_total }}')        || 0;
+            const reduction     = parseInt('${{ steps.metrics.outputs.reduction }}')            || 0;
+            const reductionRate = parseInt('${{ steps.metrics.outputs.reduction_rate }}')       || 0;
 
             const filled = Math.floor(progress / 5);
             const progressBar = '█'.repeat(filled) + '░'.repeat(20 - filled);
