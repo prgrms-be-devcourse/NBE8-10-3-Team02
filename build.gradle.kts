@@ -108,6 +108,10 @@ tasks.jacocoTestReport {
 	}
 }
 
+ktlint {
+	version.set("1.4.0")
+}
+
 detekt {
 	config.setFrom("config/detekt/detekt.yml")
 	buildUponDefaultConfig = true
