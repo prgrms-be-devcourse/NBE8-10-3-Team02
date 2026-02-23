@@ -94,6 +94,10 @@ dependencies {
 	// pgvector
 	implementation("com.pgvector:pgvector:0.1.6")
 
+    //Detekt에서 쓰는 Ktlint Wrapper
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
+
+
 }
 
 tasks.withType<Test> {
@@ -115,6 +119,15 @@ ktlint {
 detekt {
 	config.setFrom("config/detekt/detekt.yml")
 	buildUponDefaultConfig = true
+}
+
+// detekt 1.23.7 is compiled with Kotlin 2.0.10 — pin its classpath so the version check passes
+configurations.matching { it.name == "detekt" }.all {
+	resolutionStrategy.eachDependency {
+		if (requested.group == "org.jetbrains.kotlin") {
+			useVersion("2.0.10")
+		}
+	}
 }
 
 
