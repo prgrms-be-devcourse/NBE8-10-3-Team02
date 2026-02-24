@@ -57,6 +57,7 @@ dependencies {
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
+    kapt("org.projectlombok:lombok")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
