@@ -69,9 +69,9 @@ public class ApiV1MemberGameController {
         if (memberId != rq.getActor().getId()){
             throw new ServiceException("403","Cannot add to this library");
         }
-        Member actor = Optional.ofNullable(memberService.findById(rq.getActor().getId())).orElseThrow();
-        Game game = gameService.findById(request.gameId()).orElseThrow(() -> new ServiceException("404-1", "No Game"));
-        MemberGame memberGame = memberGameService.addToLibrary(request.platform(), request.playtime(), request.isFavorite(), request.status(), actor, game);
+        Member actor = memberService.findById(rq.getActor().getId()).orElseThrow();
+        Game game = gameService.findById(request.gameId).orElseThrow(() -> new ServiceException("404-1", "No Game"));
+        MemberGame memberGame = memberGameService.addToLibrary(request.platform, request.playtime, request.isFavorite, request.status, actor, game);
         memberService.flush();
         return new RsData<>(
                 "201-1",
