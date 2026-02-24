@@ -102,6 +102,17 @@ dependencies {
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
 
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+	// QueryDSL 라이브러리
+	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+
+	// 2. 중요: annotationProcessor 대신 kapt를 사용해야 코틀린 엔티티를 인식합니다.
+	kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+	kapt("jakarta.persistence:jakarta.persistence-api")
+	kapt("jakarta.annotation:jakarta.annotation-api")
+
+	// 롬복은 자바 클래스들을 위해 남겨둡니다.
+	compileOnly("org.projectlombok:lombok")
+	annotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.withType<Test> {

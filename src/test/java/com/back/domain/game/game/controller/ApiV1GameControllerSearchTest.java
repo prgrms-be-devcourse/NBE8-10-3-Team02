@@ -3,7 +3,6 @@ package com.back.domain.game.game.controller;
 import com.back.domain.game.game.dto.GameSearchCondition;
 import com.back.domain.game.game.dto.GameSearchResponse;
 import com.back.domain.game.game.dto.GenreResponse;
-import com.back.domain.game.game.service.GameSearchService;
 import com.back.domain.game.game.service.GameService;
 import com.back.domain.game.game.service.GenreService;
 import org.junit.jupiter.api.DisplayName;
