@@ -7,14 +7,11 @@ import jakarta.validation.constraints.NotNull;
 public record MemberGameAddRequest(
         @NotBlank
         String platform,
-        @NotNull
         @Min(0)
         double playtime,
-        @NotNull
         boolean isFavorite,
         @NotNull
         StatusEnum status,
-        @NotNull
         int gameId
 ) {
 }

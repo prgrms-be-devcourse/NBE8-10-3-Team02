@@ -44,7 +44,7 @@ public class ApiV1MemberGameController {
                                            @RequestParam(required = false) String platform
     ) {
         if (memberId != rq.getActor().getId()){
-            throw new ServiceException("401","Cannot view this library");
+            throw new ServiceException("403","Cannot view this library");
         }
 
         // Parse status string to enum if provided
@@ -67,7 +67,7 @@ public class ApiV1MemberGameController {
     @Operation(summary = "라이브러리에 멤버게임 추가")
     public RsData addToLibrary(@PathVariable("memberId") int memberId, @RequestBody MemberGameAddRequest request){
         if (memberId != rq.getActor().getId()){
-            throw new ServiceException("401","Cannot add to this library");
+            throw new ServiceException("403","Cannot add to this library");
         }
         Member actor = Optional.ofNullable(memberService.findById(rq.getActor().getId())).orElseThrow();
         Game game = gameService.findById(request.gameId()).orElseThrow(() -> new ServiceException("404-1", "No Game"));
@@ -91,7 +91,7 @@ public class ApiV1MemberGameController {
             @Valid @RequestBody MemberGameUpdateRequest request
     ) {
         if (memberId != rq.getActor().getId()){
-            throw new ServiceException("401","Cannot update this library");
+            throw new ServiceException("403","Cannot update this library");
         }
         MemberGame memberGame = memberGameService.updateMemberGame(
                 memberGameId,
@@ -113,7 +113,7 @@ public class ApiV1MemberGameController {
     public RsData<Void> removeFromLibrary(@PathVariable("memberId") int memberId, @PathVariable("memberGameId") int memberGameId){
         Member actor = rq.getActor();
         if (memberId != actor.getId()){
-            throw new ServiceException("401","Cannot delete from this library");
+            throw new ServiceException("403","Cannot delete from this library");
         }
         Member member = Optional.ofNullable(memberService.findById(actor.getId())).orElseThrow();
         memberGameService.removeFromLibrary(member, memberGameId);
