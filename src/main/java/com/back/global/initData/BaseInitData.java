@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Configuration
@@ -60,8 +59,8 @@ public class BaseInitData {
     public void work2() {
         if (AppConfig.isProd()) return;
 
-        Member user1 = memberService.findByEmail("user1@test.com").orElse(null);
-        Member user2 = memberService.findByEmail("user2@test.com").orElse(null);
+        Member user1 = memberService.findByEmail("user1@test.com");
+        Member user2 = memberService.findByEmail("user2@test.com");
 
         if (user1 == null || user2 == null) return;
 

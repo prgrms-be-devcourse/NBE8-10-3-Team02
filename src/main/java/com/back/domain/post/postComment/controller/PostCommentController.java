@@ -15,8 +15,7 @@ import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,7 +131,8 @@ public class PostCommentController {
         Post post = postService.findById(postId)
                 .orElseThrow(()-> new ServiceException("404-1", "해당 게시글을 찾을 수 없습니다."));
 
-        Member author = memberService.findById(user.getId()).get();
+        Member author = Optional.ofNullable(memberService.findById(user.getId()))
+                .orElseThrow(() -> new ServiceException("404-1", "존재하지 않는 회원입니다."));
         PostComment postComment =
                 postService.writeComment(author, post, reqBody.content(), reqBody.parentId());
 

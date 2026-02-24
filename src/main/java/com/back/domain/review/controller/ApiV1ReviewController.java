@@ -15,6 +15,7 @@ import com.back.global.rq.Rq;
 import com.back.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -117,7 +118,7 @@ public class ApiV1ReviewController {
     @Transactional
     @Operation(summary = "수정")
     public RsData<ReviewDto> modify(@PathVariable int id, @RequestBody ReviewModifyRequest reqBody) {
-        Member actor = memberService.findById(rq.getActor().getId()).orElseThrow();
+        Member actor = Optional.ofNullable(memberService.findById(rq.getActor().getId())).orElseThrow();
         Review review = reviewService.findById(id).orElseThrow();//Todo
         review.checkActorCanModify(actor);
         reviewService.modify(review, reqBody.title(), reqBody.content(), reqBody.rating());

@@ -78,7 +78,7 @@ class ApiV1AuthControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.resultCode").value("201-1"));
 
-        assertThat(memberRepository.findByEmail(email)).isPresent();
+        assertThat(memberRepository.findByEmail(email)).isNotNull();
     }
 
     @Test
