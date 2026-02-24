@@ -94,13 +94,9 @@ public class MemberGameService {
 
     @Transactional
     public MemberGame updateReview(int memberId, Long gameId, Review review){
+        //This also verifies ownership of the game
         MemberGame memberGame = memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
                 .orElseThrow(() -> new ServiceException("404", "MemberGame not found"));
-        // Verify ownership
-        if (memberGame.getMember().getId() != memberId) {
-            throw new ServiceException("403", "Not your game");
-        }
-        // Update fields
         memberGame.setReview(review);
         return memberGame;
     }
