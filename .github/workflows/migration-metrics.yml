@@ -1,0 +1,229 @@
+name: Migration Metrics
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop]
+
+jobs:
+  build-and-run-metrics:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Calculate migration metrics
+        id: metrics
+        run: |
+          # 1. Migration Progress
+          ORIGINAL_JAVA_FILES=215
+
+          JAVA_FILES=$(find src/main/java -name "*.java" 2>/dev/null | wc -l || echo 0)
+          KOTLIN_FILES=$(find src/main/kotlin -name "*.kt" 2>/dev/null | wc -l || echo 0)
+          MIGRATED=$((ORIGINAL_JAVA_FILES - JAVA_FILES))
+          PROGRESS=$((MIGRATED * 100 / ORIGINAL_JAVA_FILES))
+
+          echo "migration_progress=$PROGRESS"   >> $GITHUB_OUTPUT
+          echo "original_java_files=$ORIGINAL_JAVA_FILES" >> $GITHUB_OUTPUT
+          echo "java_files=$JAVA_FILES"          >> $GITHUB_OUTPUT
+          echo "kotlin_files=$KOTLIN_FILES"      >> $GITHUB_OUTPUT
+          echo "migrated=$MIGRATED"              >> $GITHUB_OUTPUT
+
+          # 2. Null Safety Metrics
+          BANG_COUNT=$(grep -r "!!" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          SAFE_CALL=$(grep -r "?\." src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          ELVIS=$(grep -r "?:" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+
+          echo "bang_count=$BANG_COUNT"  >> $GITHUB_OUTPUT
+          echo "safe_call=$SAFE_CALL"    >> $GITHUB_OUTPUT
+          echo "elvis=$ELVIS"            >> $GITHUB_OUTPUT
+
+          if [ $((SAFE_CALL + ELVIS + BANG_COUNT)) -gt 0 ]; then
+            SAFETY_SCORE=$(((SAFE_CALL + ELVIS) * 100 / (SAFE_CALL + ELVIS + BANG_COUNT)))
+          else
+            SAFETY_SCORE=100
+          fi
+          echo "safety_score=$SAFETY_SCORE" >> $GITHUB_OUTPUT
+
+          # 3. Kotlin Idioms
+          DATA_CLASS=$(grep -rP "\bdata class\b" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          SEALED_CLASS=$(grep -rP "\bsealed class\b" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          EXTENSION_FN=$(grep -rPE "\bfun [A-Za-z]+\." src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+          WHEN_EXPR=$(grep -rP "when\s*\(" src/main/kotlin --include="*.kt" 2>/dev/null | wc -l || echo 0)
+
+          echo "data_class=$DATA_CLASS"     >> $GITHUB_OUTPUT
+          echo "sealed_class=$SEALED_CLASS" >> $GITHUB_OUTPUT
+          echo "extension_fn=$EXTENSION_FN" >> $GITHUB_OUTPUT
+          echo "when_expr=$WHEN_EXPR"       >> $GITHUB_OUTPUT
+
+          # 4. Code Reduction
+          ORIGINAL_JAVA_LINES=9487
+
+          JAVA_LINES=$(find src/main/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          JAVA_LINES=${JAVA_LINES:-0}
+          KOTLIN_LINES=$(find src/main/kotlin -name "*.kt" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}')
+          KOTLIN_LINES=${KOTLIN_LINES:-0}
+          CURRENT_TOTAL=$((JAVA_LINES + KOTLIN_LINES))
+          REDUCTION=$((ORIGINAL_JAVA_LINES - CURRENT_TOTAL))
+          REDUCTION_RATE=$((REDUCTION * 100 / ORIGINAL_JAVA_LINES))
+
+          echo "original_java_lines=$ORIGINAL_JAVA_LINES" >> $GITHUB_OUTPUT
+          echo "java_lines=$JAVA_LINES"         >> $GITHUB_OUTPUT
+          echo "kotlin_lines=$KOTLIN_LINES"     >> $GITHUB_OUTPUT
+          echo "current_total=$CURRENT_TOTAL"   >> $GITHUB_OUTPUT
+          echo "reduction=$REDUCTION"           >> $GITHUB_OUTPUT
+          echo "reduction_rate=$REDUCTION_RATE" >> $GITHUB_OUTPUT
+
+      - name: Print metrics to stdout (push)
+        if: github.event_name == 'push'
+        run: |
+          S="${{ steps.metrics.outputs.migration_progress }}"
+          filled=$(( S / 5 ))
+          bar=$(printf '█%.0s' $(seq 1 $filled 2>/dev/null) ; printf '░%.0s' $(seq 1 $((20 - filled)) 2>/dev/null))
+
+          echo "========================================"
+          echo "  📊 Kotlin 마이그레이션 메트릭"
+          echo "========================================"
+          echo ""
+          echo "  🚀 진행률: $S%"
+          echo "  [$bar] $S%"
+          echo "  ${{ steps.metrics.outputs.migrated }} / ${{ steps.metrics.outputs.original_java_files }} 파일 완료"
+          echo ""
+          echo "  📁 파일 현황"
+          echo "  ┌─────────────────────────────┬───────┐"
+          echo "  │ 원본 Java 파일 (baseline)   │  ${{ steps.metrics.outputs.original_java_files }}  │"
+          echo "  │ 남은 Java 파일              │  ${{ steps.metrics.outputs.java_files }}  │"
+          echo "  │ 변환된 Kotlin 파일          │  ${{ steps.metrics.outputs.kotlin_files }}  │"
+          echo "  └─────────────────────────────┴───────┘"
+          echo ""
+          echo "  📉 코드 감소량"
+          echo "  ┌─────────────────────────────┬───────┐"
+          echo "  │ 마이그레이션 전 (baseline)  │ ${{ steps.metrics.outputs.original_java_lines }} │"
+          echo "  │ 현재 전체 라인 수           │ ${{ steps.metrics.outputs.current_total }} │"
+          echo "  │ 감소량                      │ ${{ steps.metrics.outputs.reduction }} 라인 (${{ steps.metrics.outputs.reduction_rate }}%) │"
+          echo "  └─────────────────────────────┴───────┘"
+          echo ""
+          echo "  🛡️  Null 안전성: ${{ steps.metrics.outputs.safety_score }}%"
+          echo "  !! 연산자: ${{ steps.metrics.outputs.bang_count }}  |  ?. 호출: ${{ steps.metrics.outputs.safe_call }}  |  ?: 엘비스: ${{ steps.metrics.outputs.elvis }}"
+          echo ""
+          echo "  🎯 Kotlin 관용 표현"
+          echo "  data class: ${{ steps.metrics.outputs.data_class }}  |  sealed class: ${{ steps.metrics.outputs.sealed_class }}  |  확장 함수: ${{ steps.metrics.outputs.extension_fn }}  |  when: ${{ steps.metrics.outputs.when_expr }}"
+          echo ""
+          echo "========================================"
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const progress      = parseInt('${{ steps.metrics.outputs.migration_progress }}')   || 0;
+            const origFiles     = parseInt('${{ steps.metrics.outputs.original_java_files }}')  || 0;
+            const javaFiles     = parseInt('${{ steps.metrics.outputs.java_files }}')           || 0;
+            const kotlinFiles   = parseInt('${{ steps.metrics.outputs.kotlin_files }}')         || 0;
+            const migrated      = parseInt('${{ steps.metrics.outputs.migrated }}')             || 0;
+
+            const bangCount     = parseInt('${{ steps.metrics.outputs.bang_count }}')           || 0;
+            const safeCall      = parseInt('${{ steps.metrics.outputs.safe_call }}')            || 0;
+            const elvis         = parseInt('${{ steps.metrics.outputs.elvis }}')                || 0;
+            const safetyScore   = parseInt('${{ steps.metrics.outputs.safety_score }}')         || 0;
+
+            const dataClass     = parseInt('${{ steps.metrics.outputs.data_class }}')           || 0;
+            const sealedClass   = parseInt('${{ steps.metrics.outputs.sealed_class }}')         || 0;
+            const extensionFn   = parseInt('${{ steps.metrics.outputs.extension_fn }}')         || 0;
+            const whenExpr      = parseInt('${{ steps.metrics.outputs.when_expr }}')            || 0;
+
+            const origLines     = parseInt('${{ steps.metrics.outputs.original_java_lines }}')  || 0;
+            const javaLines     = parseInt('${{ steps.metrics.outputs.java_lines }}')           || 0;
+            const kotlinLines   = parseInt('${{ steps.metrics.outputs.kotlin_lines }}')         || 0;
+            const currentTotal  = parseInt('${{ steps.metrics.outputs.current_total }}')        || 0;
+            const reduction     = parseInt('${{ steps.metrics.outputs.reduction }}')            || 0;
+            const reductionRate = parseInt('${{ steps.metrics.outputs.reduction_rate }}')       || 0;
+
+            const filled = Math.floor(progress / 5);
+            const progressBar = '█'.repeat(filled) + '░'.repeat(20 - filled);
+
+            const safetyEmoji = bangCount > 10 ? '🔴' : bangCount > 5 ? '🟡' : '🟢';
+            const bangWarning = bangCount > 10
+              ? `> ⚠️ **경고**: \`!!\` 연산자가 ${bangCount}개 발견됐습니다. 안전 호출(\`?.\`) 또는 엘비스 연산자(\`?:\`)로 교체해 주세요.\n`
+              : '';
+
+            const marker = '<!-- kotlin-migration-metrics -->';
+
+            const body = `${marker}
+            ## 📊 Kotlin 마이그레이션 메트릭
+
+            ### 🚀 진행률: ${progress}%
+            \`\`\`
+            ${progressBar} ${progress}%
+            \`\`\`
+
+            ### 📁 파일 현황
+            | 구분 | 수량 |
+            |------|-----:|
+            | 원본 Java 파일 (baseline) | ${origFiles} |
+            | 남은 Java 파일 | ${javaFiles} |
+            | 변환된 Kotlin 파일 | ${kotlinFiles} |
+            | 마이그레이션 완료 | **${migrated} / ${origFiles}** |
+
+            ### 📉 코드 감소량
+            | 구분 | 라인 수 |
+            |------|--------:|
+            | 마이그레이션 전 Java (baseline) | ${origLines.toLocaleString()} |
+            | 현재 Java 라인 수 | ${javaLines.toLocaleString()} |
+            | 현재 Kotlin 라인 수 | ${kotlinLines.toLocaleString()} |
+            | 현재 전체 라인 수 | ${currentTotal.toLocaleString()} |
+            | **감소량** | **${reduction.toLocaleString()} 라인 (${reductionRate}%)** |
+
+            ### 🛡️ Null 안전성 점수: ${safetyScore}% ${safetyEmoji}
+            ${bangWarning}
+            | 연산자 | 횟수 |
+            |--------|-----:|
+            | \`!!\` 연산자 (위험) | ${bangCount} |
+            | 안전 호출 (\`?.\`) | ${safeCall} |
+            | 엘비스 연산자 (\`?:\`) | ${elvis} |
+
+            ### 🎯 Kotlin 관용 표현
+            | 패턴 | 횟수 |
+            |------|-----:|
+            | \`data class\` | ${dataClass} |
+            | \`sealed class\` | ${sealedClass} |
+            | 확장 함수 | ${extensionFn} |
+            | \`when\` 표현식 | ${whenExpr} |
+
+            ---
+            💡 **더 나은 Kotlin 코드를 위한 팁:**
+            - \`!!\` 대신 \`?.\` 또는 \`?:\` 사용하기
+            - DTO에는 \`data class\` 사용하기
+            - Builder 패턴 대신 named parameter 사용하기
+            - 유틸리티 클래스 대신 확장 함수 사용하기
+            `.replace(/^            /gm, '');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }

@@ -1,0 +1,136 @@
+name: Code Quality Checks, Test Coverage Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle.kts') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Setup reviewdog
+        uses: reviewdog/action-setup@v1
+        with:
+          reviewdog_version: latest
+
+      # ktlint — generates checkstyle XML, piped to reviewdog
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck
+        continue-on-error: true
+
+      - name: reviewdog (ktlint)
+        if: github.event_name == 'pull_request'
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat build/reports/ktlint/ktlintMainSourceSetCheck/ktlintMainSourceSetCheck.xml \
+            | reviewdog -f=checkstyle -name="ktlint" -reporter="github-pr-review" -level="warning"
+
+      # detekt — generates checkstyle XML, piped to reviewdog
+      - name: Run detekt
+        run: ./gradlew detekt
+        continue-on-error: true
+
+      - name: reviewdog (detekt)
+        if: github.event_name == 'pull_request'
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat build/reports/detekt/detekt.xml \
+            | reviewdog -f=checkstyle -name="detekt" -reporter="github-pr-review" -level="warning"
+
+      # Coverage
+      - name: Test
+        run: ./gradlew test jacocoTestReport
+
+      - name: Coverage Report
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: build/reports/jacoco/test/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 60
+
+      - name: Print quality summary to stdout (push)
+        if: github.event_name == 'push' && always()
+        run: |
+          # ktlint 위반 건수
+          KTLINT_XML="build/reports/ktlint/ktlintMainSourceSetCheck/ktlintMainSourceSetCheck.xml"
+          if [ -f "$KTLINT_XML" ]; then
+            KTLINT_COUNT=$(grep "<error " "$KTLINT_XML" 2>/dev/null | wc -l | tr -d ' ')
+          else
+            KTLINT_COUNT="N/A"
+          fi
+
+          # detekt 위반 건수
+          DETEKT_XML="build/reports/detekt/detekt.xml"
+          if [ -f "$DETEKT_XML" ]; then
+            DETEKT_COUNT=$(grep "<error " "$DETEKT_XML" 2>/dev/null | wc -l | tr -d ' ')
+          else
+            DETEKT_COUNT="N/A"
+          fi
+
+          # jacoco 전체 커버리지
+          JACOCO_XML="build/reports/jacoco/test/jacocoTestReport.xml"
+          if [ -f "$JACOCO_XML" ]; then
+            COVERAGE=$(grep -o 'type="INSTRUCTION" missed="[0-9]*" covered="[0-9]*"' "$JACOCO_XML" \
+              | tail -1 \
+              | awk -F'"' '{m=$4; c=$6; t=m+c; if(t>0) printf "%d%%", int(c*100/t+0.5); else print "0%"}')
+          else
+            COVERAGE="N/A (테스트 미실행)"
+          fi
+
+          # 상태 표시
+          [ "$KTLINT_COUNT" = "0" ] && KTLINT_ICON="PASS" || KTLINT_ICON="FAIL"
+          [ "$DETEKT_COUNT" = "0" ] && DETEKT_ICON="PASS" || DETEKT_ICON="FAIL"
+          COV_NUM=$(echo "$COVERAGE" | tr -d '%')
+          if echo "$COV_NUM" | grep -qE '^[0-9]+$' && [ "$COV_NUM" -ge 70 ]; then
+            COV_ICON="PASS"
+          else
+            COV_ICON="FAIL"
+          fi
+
+          echo "========================================"
+          echo "  📋 Code Quality 요약"
+          echo "========================================"
+          echo ""
+          echo "  🔍 정적 분석"
+          echo "  ┌──────────────┬────────────────────────┐"
+          printf "  │ %-12s │ [%-4s] %-16s │\n" "ktlint" "$KTLINT_ICON" "${KTLINT_COUNT}건"
+          printf "  │ %-12s │ [%-4s] %-16s │\n" "detekt" "$DETEKT_ICON" "${DETEKT_COUNT}건"
+          echo "  └──────────────┴────────────────────────┘"
+          echo ""
+          echo "  🧪 테스트 커버리지"
+          echo "  ┌──────────────┬────────────────────────┐"
+          printf "  │ %-12s │ [%-4s] %-16s │\n" "전체 커버리지" "$COV_ICON" "$COVERAGE (기준: 70%)"
+          echo "  └──────────────┴────────────────────────┘"
+          echo ""
+          echo "========================================"

@@ -1,10 +1,13 @@
 plugins {
 	java
+	jacoco
 	id("org.springframework.boot") version "3.5.10"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("jvm") version "2.1.0"
 	kotlin("plugin.spring") version "2.1.0"
 	kotlin("plugin.jpa") version "2.1.0"
+	id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+	id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 group = "com"
@@ -91,10 +94,52 @@ dependencies {
 	// pgvector
 	implementation("com.pgvector:pgvector:0.1.6")
 
+    //Detekt에서 쓰는 Ktlint Wrapper
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
+
+
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test)
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+ktlint {
+	version.set("1.4.0")
+	reporters {
+		reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
+	}
+}
+
+// ktlint을 build/check 라이프사이클에서 분리.
+// ktlint 검사는 CI code-quality 워크플로우에서 ./gradlew ktlintCheck로,혹은 code-quality.yml으로 단독 실행
+afterEvaluate {
+	val checkTask = tasks.findByName("check") ?: return@afterEvaluate
+	checkTask.setDependsOn(
+		checkTask.dependsOn.filterNot { it.toString().contains("ktlint", ignoreCase = true) },
+	)
+}
+
+detekt {
+	config.setFrom("config/detekt/detekt.yml")
+	buildUponDefaultConfig = true
+}
+
+// detekt 1.23.7 is compiled with Kotlin 2.0.10 — pin its classpath so the version check passes
+configurations.matching { it.name == "detekt" }.all {
+	resolutionStrategy.eachDependency {
+		if (requested.group == "org.jetbrains.kotlin") {
+			useVersion("2.0.10")
+		}
+	}
 }
 
 
