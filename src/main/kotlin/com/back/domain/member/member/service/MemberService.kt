@@ -13,9 +13,8 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val authTokenService: AuthTokenService
+    private val authTokenService: AuthTokenService,
 ) {
-
     fun findByEmail(email: String): Member? = memberRepository.findByEmail(email)
 
     fun findByApiKey(apiKey: String): Member? = memberRepository.findByApiKey(apiKey)
@@ -27,7 +26,11 @@ class MemberService(
     fun existsByNickname(nickname: String): Boolean = memberRepository.existsByNickname(nickname)
 
     @Transactional
-    fun join(email: String, password: String, nickname: String): Member {
+    fun join(
+        email: String,
+        password: String,
+        nickname: String,
+    ): Member {
         if (memberRepository.existsByEmail(email)) {
             throw ServiceException("409-1", "이미 존재하는 이메일입니다.")
         }
@@ -40,9 +43,13 @@ class MemberService(
         return memberRepository.save(member)
     }
 
-    fun login(email: String, password: String): Member {
-        val member = memberRepository.findByEmail(email)
-            ?: throw ServiceException("401-1", "이메일 또는 비밀번호가 올바르지 않습니다.")
+    fun login(
+        email: String,
+        password: String,
+    ): Member {
+        val member =
+            memberRepository.findByEmail(email)
+                ?: throw ServiceException("401-1", "이메일 또는 비밀번호가 올바르지 않습니다.")
 
         if (!passwordEncoder.matches(password, member.password)) {
             throw ServiceException("401-1", "이메일 또는 비밀번호가 올바르지 않습니다.")
@@ -52,16 +59,20 @@ class MemberService(
 
     fun genAccessToken(member: Member): String = authTokenService.genAccessToken(member)
 
-    fun payload(accessToken: String): Map<String, Any> {
-        return authTokenService.payload(accessToken)
+    fun payload(accessToken: String): Map<String, Any> =
+        authTokenService.payload(accessToken)
             ?: throw ServiceException("401-2", "인증 정보가 유효하지 않습니다.")
-    }
 
     @Transactional
-    fun changePassword(memberId: Int, oldPassword: String, newPassword: String): Member {
-        val member = memberRepository.findById(memberId).orElseThrow {
-            ServiceException("404-1", "회원이 존재하지 않습니다.")
-        }
+    fun changePassword(
+        memberId: Int,
+        oldPassword: String,
+        newPassword: String,
+    ): Member {
+        val member =
+            memberRepository.findById(memberId).orElseThrow {
+                ServiceException("404-1", "회원이 존재하지 않습니다.")
+            }
 
         if (!passwordEncoder.matches(oldPassword, member.password)) {
             throw ServiceException("401-2", "현재 비밀번호가 일치하지 않습니다.")
@@ -76,11 +87,10 @@ class MemberService(
         return member
     }
 
-    fun getMe(memberId: Int): Member {
-        return memberRepository.findById(memberId).orElseThrow {
+    fun getMe(memberId: Int): Member =
+        memberRepository.findById(memberId).orElseThrow {
             ServiceException("404-1", "회원이 존재하지 않습니다.")
         }
-    }
 
     @Transactional
     fun flush() {
@@ -88,10 +98,14 @@ class MemberService(
     }
 
     @Transactional
-    fun changeNickname(memberId: Int, newNickname: String): Member {
-        val member = memberRepository.findById(memberId).orElseThrow {
-            ServiceException("404-1", "회원이 존재하지 않습니다.")
-        }
+    fun changeNickname(
+        memberId: Int,
+        newNickname: String,
+    ): Member {
+        val member =
+            memberRepository.findById(memberId).orElseThrow {
+                ServiceException("404-1", "회원이 존재하지 않습니다.")
+            }
 
         val nn = newNickname.trim()
 

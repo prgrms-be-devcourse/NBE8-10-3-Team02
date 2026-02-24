@@ -5,18 +5,16 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import java.util.*
+import java.util.Date
 import javax.crypto.SecretKey
 
 @Service
 class AuthTokenService(
     @Value("\${custom.jwt.secretKey}")
     private val secretKeyString: String,
-
     @Value("\${custom.accessToken.expirationSeconds}")
-    private val expirationSeconds: Int
+    private val expirationSeconds: Int,
 ) {
-
     // SecretKey를 매번 생성하지 않도록 지연 초기화(lazy) 처리
     private val cachedKey: SecretKey by lazy {
         Keys.hmacShaKeyFor(secretKeyString.toByteArray())
@@ -29,7 +27,8 @@ class AuthTokenService(
         val now = Date()
         val exp = Date(now.time + 1000L * expirationSeconds)
 
-        return Jwts.builder()
+        return Jwts
+            .builder()
             .claim("id", member.id)
             .claim("email", member.email)
             .claim("nickname", member.nickname)
@@ -44,7 +43,8 @@ class AuthTokenService(
      */
     fun payload(token: String): Map<String, Any>? {
         return runCatching {
-            Jwts.parser()
+            Jwts
+                .parser()
                 .verifyWith(cachedKey)
                 .build()
                 .parse(token)

@@ -7,7 +7,6 @@ import com.back.domain.post.dto.PostDto;
 import com.back.domain.post.dto.PostModifyRequest;
 import com.back.domain.post.post.entity.Post;
 import com.back.domain.post.post.service.PostService;
-import com.back.domain.tag.tag.entity.Tag;
 import com.back.domain.tag.tag.service.TagService;
 import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;

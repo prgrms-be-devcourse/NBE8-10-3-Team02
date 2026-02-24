@@ -4,23 +4,24 @@ import com.back.domain.game.game.entity.Game
 import com.back.domain.member.memberGame.StatusEnum
 import com.back.domain.member.memberGame.entity.MemberGame
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.OneToMany
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Entity
 class Member(
     @Column(unique = true)
     var email: String? = null,
-
     var password: String? = null,
-
     @Column(unique = true, length = 30, nullable = false)
-    var nickname: String? = null
+    var nickname: String? = null,
 ) : BaseEntity() {
-
     @Column(unique = true)
     var apiKey: String = UUID.randomUUID().toString()
 
@@ -35,7 +36,7 @@ class Member(
         mappedBy = "member",
         fetch = FetchType.LAZY,
         cascade = [CascadeType.PERSIST, CascadeType.REMOVE],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
     val library: MutableList<MemberGame> = mutableListOf()
 
@@ -47,8 +48,6 @@ class Member(
         idField.isAccessible = true
         idField.set(this, id)
     }
-
-    // --- 비즈니스 로직 ---
 
     fun changePassword(encodedPassword: String) {
         this.password = encodedPassword
@@ -63,18 +62,15 @@ class Member(
         playtime: Double,
         isFavorite: Boolean,
         status: StatusEnum,
-        game: Game
+        game: Game,
     ): MemberGame {
-        // 에러 해결: MemberGame이 자바 클래스이므로 인자 이름(platformId = ...)을 모두 제거함
         val memberGame = MemberGame(platformId, playtime, isFavorite, status, this, game)
         library.add(memberGame)
         return memberGame
     }
 
     // 자바의 Optional<MemberGame> 대신 코틀린의 Nullable(?)을 사용
-    fun getMemberGameById(memberGameId: Int): MemberGame? =
-        library.find { it.id == memberGameId }
+    fun getMemberGameById(memberGameId: Int): MemberGame? = library.find { it.id == memberGameId }
 
-    fun removeGame(memberGameId: Int): Boolean =
-        library.removeIf { it.id == memberGameId }
+    fun removeGame(memberGameId: Int): Boolean = library.removeIf { it.id == memberGameId }
 }

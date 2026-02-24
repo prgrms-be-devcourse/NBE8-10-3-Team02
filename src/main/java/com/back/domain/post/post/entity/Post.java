@@ -5,11 +5,9 @@ import com.back.domain.post.postComment.entity.PostComment;
 import com.back.domain.tag.postTag.entity.PostTag;
 import com.back.domain.tag.tag.entity.Tag;
 import com.back.global.jpa.entity.BaseEntity;
-import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 

@@ -15,8 +15,6 @@ import com.back.global.rsData.RsData;
 import com.back.global.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

@@ -12,22 +12,26 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/members")
 @Validated
 class ApiV1MemberController(
     private val memberService: MemberService,
-    private val rq: Rq
+    private val rq: Rq,
 ) {
-
     @GetMapping("/check-nickname")
     fun checkNickname(
         @RequestParam
         @NotBlank(message = "닉네임은 필수 입력값입니다.")
         @Size(min = 2, max = 30, message = "닉네임은 2~30자여야 합니다.")
-        nickname: String
+        nickname: String,
     ): RsData<CheckNicknameResponse> {
         val available = !memberService.existsByNickname(nickname)
         val message = if (available) "사용 가능한 닉네임입니다." else "이미 사용 중인 닉네임입니다."
@@ -35,7 +39,7 @@ class ApiV1MemberController(
         return RsData(
             "200-1",
             message,
-            CheckNicknameResponse(available)
+            CheckNicknameResponse(available),
         )
     }
 
@@ -49,7 +53,9 @@ class ApiV1MemberController(
     }
 
     @PutMapping("/me/password")
-    fun changePassword(@Valid @RequestBody req: MemberPasswordChangeRequest): RsData<Void?> {
+    fun changePassword(
+        @Valid @RequestBody req: MemberPasswordChangeRequest,
+    ): RsData<Void?> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인 후 이용해주세요.")
 
         memberService.changePassword(actor.id, req.oldPassword, req.newPassword)
@@ -57,7 +63,9 @@ class ApiV1MemberController(
     }
 
     @PutMapping("/me/nickname")
-    fun changeNickname(@Valid @RequestBody req: MemberNicknameChangeRequest): RsData<Void?> {
+    fun changeNickname(
+        @Valid @RequestBody req: MemberNicknameChangeRequest,
+    ): RsData<Void?> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인 후 이용해주세요.")
 
         memberService.changeNickname(actor.id, req.nickname)

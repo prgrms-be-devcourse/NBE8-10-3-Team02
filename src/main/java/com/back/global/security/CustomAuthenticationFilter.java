@@ -1,6 +1,5 @@
 package com.back.global.security;
 
-import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.service.MemberService;
 import com.back.global.exception.ServiceException;
 import com.back.global.rq.Rq;

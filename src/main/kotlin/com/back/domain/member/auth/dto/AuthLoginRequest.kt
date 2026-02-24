@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank
 data class AuthLoginRequest(
     @field:NotBlank
     val email: String,
-
     @field:NotBlank
-    val password: String
+    val password: String,
 )
