@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main, develop ]
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, 9-refactor-membergame-마이그레이션-시작만]
 
 jobs:
   code-quality:
