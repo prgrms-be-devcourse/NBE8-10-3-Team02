@@ -3,7 +3,9 @@ package com.back.domain.review.controller;
 import com.back.domain.game.game.entity.Game;
 import com.back.domain.game.game.repository.GameRepository;
 import com.back.domain.game.game.service.GenreSyncService;
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.member.repository.MemberRepository;
+import com.back.domain.review.repository.ReviewRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.DisplayName;
@@ -34,6 +36,7 @@ class ApiV1ReviewControllerTest {
     @Autowired MockMvc mvc;
     @Autowired MemberRepository memberRepository;
     @Autowired GameRepository gameRepository;
+    @Autowired ReviewRepository reviewRepository;
 
     private final ObjectMapper om = new ObjectMapper();
 
@@ -132,9 +135,11 @@ class ApiV1ReviewControllerTest {
         String email = uniqueEmail("reviewer");
         String nickname = uniqueNickname("reviewer");
         signup(email, "1234", nickname);
+        Cookie[] cookies = loginAndGetCookies(email, "1234");
         int memberId = memberRepository.findByEmail(email).get().getId();
 
-        mvc.perform(get("/api/v1/reviews/member/{memberId}", memberId))
+        mvc.perform(get("/api/v1/reviews/member/{memberId}", memberId)
+                        .cookie(cookies))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.resultCode").value("200-1"))
                 .andExpect(jsonPath("$.data.content").isArray());
@@ -167,7 +172,8 @@ class ApiV1ReviewControllerTest {
         int reviewId = om.readTree(writeResult.getResponse().getContentAsString())
                 .get("data").get("id").asInt();
 
-        mvc.perform(get("/api/v1/reviews/{id}", reviewId))
+        mvc.perform(get("/api/v1/reviews/{id}", reviewId)
+                        .cookie(cookies))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Test Title"))
                 .andExpect(jsonPath("$.content").value("Test Content"))
@@ -177,7 +183,12 @@ class ApiV1ReviewControllerTest {
     @Test
     @DisplayName("리뷰 단건 조회: 없는 ID → 404-1")
     void getReview_notFound() throws Exception {
-        mvc.perform(get("/api/v1/reviews/{id}", 999999))
+        String email = uniqueEmail("reviewer");
+        signup(email, "1234", uniqueNickname("reviewer"));
+        Cookie[] cookies = loginAndGetCookies(email, "1234");
+
+        mvc.perform(get("/api/v1/reviews/{id}", 999999)
+                        .cookie(cookies))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.resultCode").value("404-1"));
     }
@@ -380,9 +391,9 @@ class ApiV1ReviewControllerTest {
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
 
-        MvcResult writeResult = writeReview(cookies, game.getId(), "Original Title", "Original Content", 3.0);
-        int reviewId = om.readTree(writeResult.getResponse().getContentAsString())
-                .get("data").get("id").asInt();
+        writeReview(cookies, game.getId(), "Original Title", "Original Content", 3.0);
+        Member author = memberRepository.findByEmail(email).get();
+        int reviewId = reviewRepository.findByAuthorAndGame(author, game).get().getId();
 
         mvc.perform(put("/api/v1/reviews/{id}", reviewId)
                         .with(csrf())
