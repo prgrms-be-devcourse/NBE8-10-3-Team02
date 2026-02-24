@@ -84,10 +84,10 @@ public class MemberGameService {
             throw new ServiceException("403", "Not your game");
         }
         // Update fields
-        if (request.status() != null) memberGame.setStatus(request.status());
-        if (request.playtime() != null) memberGame.setPlaytime(request.playtime());
-        if (request.isFavorite() != null) memberGame.setFavorite(request.isFavorite());
-        if (request.platform() != null) memberGame.setPlatformByGroupName(request.platform());
+        if (request.status != null) memberGame.setStatus(request.status);
+        if (request.playtime != null) memberGame.setPlaytime(request.playtime);
+        if (request.isFavorite != null) memberGame.setFavorite(request.isFavorite);
+        if (request.platform != null) memberGame.setPlatformByGroupName(request.platform);
         eventPublisher.publishEvent(new ProfileVectorUpdateEvent(memberId, "updateMemberGame"));
         return memberGame;
     }
