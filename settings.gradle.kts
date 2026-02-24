@@ -1,3 +1,3 @@
 rootProject.name = buildString {
-        append("NBE8-10-2-Team02")
+        append("NBE8-10-3-Team02")
     }
