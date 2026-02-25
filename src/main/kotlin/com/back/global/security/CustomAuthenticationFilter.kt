@@ -17,7 +17,6 @@ class CustomAuthenticationFilter(
     private val memberService: MemberService,
     private val rq: Rq,
 ) : OncePerRequestFilter() {
-
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val uri = request.requestURI
         return when {
@@ -95,7 +94,7 @@ class CustomAuthenticationFilter(
             setAuthentication(
                 member.id,
                 member.email ?: "",
-                member.nickname ?: ""
+                member.nickname ?: "",
             )
 
             // 새 토큰 발급 및 쿠키 갱신
@@ -113,11 +112,12 @@ class CustomAuthenticationFilter(
     ) {
         val user = SecurityUser(id, email, nickname, "", listOf())
 
-        val authentication = UsernamePasswordAuthenticationToken(
-            user,
-            user.password,
-            user.authorities,
-        )
+        val authentication =
+            UsernamePasswordAuthenticationToken(
+                user,
+                user.password,
+                user.authorities,
+            )
 
         SecurityContextHolder.getContext().authentication = authentication
     }
