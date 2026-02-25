@@ -35,7 +35,7 @@ public class ReviewService {
 
     public Review write(String title, String content, double rating, Member member, Game game) {
         // Check if user owns the game in their library
-        memberGameRepository.findByMemberIdAndGameId(member.getId(), game.getId())
+        Optional.ofNullable(memberGameRepository.findByMemberIdAndGameId(member.getId(), game.getId()))
                 .orElseThrow(() -> new ServiceException("403-3", "라이브러리에 없는 게임은 리뷰를 작성할 수 없습니다."));
 
         // Check for duplicate review
@@ -85,7 +85,7 @@ public class ReviewService {
         int authorId = review.getAuthor().getId();
         gameRepository.decrementReviewCount(review.getGame().getId());
         // Clear the review reference in MemberGame if it exists
-        memberGameRepository.findByMemberIdAndGameId(review.getAuthor().getId(), review.getGame().getId())
+        Optional.ofNullable(memberGameRepository.findByMemberIdAndGameId(review.getAuthor().getId(), review.getGame().getId()))
                 .ifPresent(memberGame -> memberGame.setReview(null));
 
         reviewRepository.delete(review);
