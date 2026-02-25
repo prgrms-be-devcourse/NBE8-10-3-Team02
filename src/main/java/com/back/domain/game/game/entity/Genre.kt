@@ -16,19 +16,20 @@ import jakarta.persistence.UniqueConstraint
     ],
 )
 class Genre(
-    // 1. 주요 필드를 주 생성자에 선언 (자바의 생성자 + 롬복 @Getter 대체)
     @Column(name = "igdb_id", nullable = false)
     var igdbId: Long,
     @Column(nullable = false)
     var name: String,
 ) {
-    // 2. ID는 DB Identity 전략이므로 초기값 0으로 선언
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
 
-    // 3. 기존 자바 코드와의 호환성을 위한 정적 메서드
     companion object {
+        // 자바 테스트 코드의 Genre.builder()를 받아주기 위한 정적 메서드
+        @JvmStatic
+        fun builder(): GenreBuilder = GenreBuilder()
+
         @JvmStatic
         fun createGenre(
             igdbId: Long,
@@ -38,5 +39,25 @@ class Genre(
                 igdbId = igdbId,
                 name = name,
             )
+    }
+
+    // 자바 팀원들의 기존 빌더 패턴 코드를 수용하기 위한 중첩 클래스
+    class GenreBuilder {
+        private var id: Long? = null
+        private var igdbId: Long = 0
+        private var name: String = ""
+
+        fun id(id: Long?) = apply { this.id = id }
+        fun igdbId(igdbId: Long) = apply { this.igdbId = igdbId }
+        fun name(name: String) = apply { this.name = name }
+
+        fun build(): Genre {
+            val genre = Genre(
+                igdbId = igdbId,
+                name = name
+            )
+            genre.id = this.id
+            return genre
+        }
     }
 }

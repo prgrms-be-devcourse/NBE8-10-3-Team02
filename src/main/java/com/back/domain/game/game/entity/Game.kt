@@ -105,7 +105,10 @@ class Game(
     override fun hashCode(): Int = Objects.hashCode(id)
 
     companion object {
-        // 기존 빌더 패턴 대신 사용할 정적 팩토리 메서드들
+        // 자바 팀원들의 Game.builder() 호출을 처리하기 위한 정적 메서드
+        @JvmStatic
+        fun builder(): GameBuilder = GameBuilder()
+
         @JvmStatic
         fun createGame(
             igdbId: Long,
@@ -147,5 +150,32 @@ class Game(
                 firstReleaseDate = firstReleaseDate,
                 lastFetchedAt = Instant.now(),
             )
+    }
+
+    // 자바 팀원들의 기존 빌더 패턴 코드를 수용하기 위한 중첩 클래스
+    class GameBuilder {
+        private var id: Int = 0
+        private var igdbId: Long = 0
+        private var name: String? = null
+        private var summary: String? = null
+        private var coverImageId: String? = null
+        private var firstReleaseDate: LocalDate? = null
+
+        fun id(id: Int) = apply { this.id = id }
+        fun igdbId(igdbId: Long) = apply { this.igdbId = igdbId }
+        fun name(name: String?) = apply { this.name = name }
+        fun summary(summary: String?) = apply { this.summary = summary }
+        fun coverImageId(coverImageId: String?) = apply { this.coverImageId = coverImageId }
+        fun firstReleaseDate(firstReleaseDate: LocalDate?) = apply { this.firstReleaseDate = firstReleaseDate }
+
+        fun build(): Game {
+            return Game(
+                igdbId = igdbId,
+                name = name,
+                summary = summary,
+                coverImageId = coverImageId,
+                firstReleaseDate = firstReleaseDate
+            )
+        }
     }
 }
