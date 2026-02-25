@@ -10,5 +10,5 @@ data class MemberGameAddRequest(
     @field:DecimalMin("0.0") val playtime: Double,
     val isFavorite: Boolean,
     @field:NotNull val status: StatusEnum,
-    val gameId: Int
+    val gameId: Int,
 )
