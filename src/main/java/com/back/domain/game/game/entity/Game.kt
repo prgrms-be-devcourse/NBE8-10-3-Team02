@@ -162,20 +162,24 @@ class Game(
         private var firstReleaseDate: LocalDate? = null
 
         fun id(id: Int) = apply { this.id = id }
+
         fun igdbId(igdbId: Long) = apply { this.igdbId = igdbId }
+
         fun name(name: String?) = apply { this.name = name }
+
         fun summary(summary: String?) = apply { this.summary = summary }
+
         fun coverImageId(coverImageId: String?) = apply { this.coverImageId = coverImageId }
+
         fun firstReleaseDate(firstReleaseDate: LocalDate?) = apply { this.firstReleaseDate = firstReleaseDate }
 
-        fun build(): Game {
-            return Game(
+        fun build(): Game =
+            Game(
                 igdbId = igdbId,
                 name = name,
                 summary = summary,
                 coverImageId = coverImageId,
-                firstReleaseDate = firstReleaseDate
+                firstReleaseDate = firstReleaseDate,
             )
-        }
     }
 }

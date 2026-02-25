@@ -48,14 +48,17 @@ class Genre(
         private var name: String = ""
 
         fun id(id: Long?) = apply { this.id = id }
+
         fun igdbId(igdbId: Long) = apply { this.igdbId = igdbId }
+
         fun name(name: String) = apply { this.name = name }
 
         fun build(): Genre {
-            val genre = Genre(
-                igdbId = igdbId,
-                name = name
-            )
+            val genre =
+                Genre(
+                    igdbId = igdbId,
+                    name = name,
+                )
             genre.id = this.id
             return genre
         }
