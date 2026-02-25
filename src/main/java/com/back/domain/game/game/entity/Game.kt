@@ -3,55 +3,48 @@ package com.back.domain.game.game.entity
 import com.back.standard.util.TimeUt
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import jakarta.persistence.*
-import lombok.*
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 
 @Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(
     name = "game",
-    uniqueConstraints = [UniqueConstraint(name = "uk_game_igdb_id", columnNames = "igdb_id")],
+    uniqueConstraints = [UniqueConstraint(name = "uk_game_igdb_id", columnNames = ["igdb_id"])],
     indexes = [Index(name = "ix_game_name", columnList = "name")]
 )
 @JsonIgnoreProperties("hibernateLazyInitializer")
-class Game {
+class Game(
+    @Column(name = "igdb_id", nullable = false)
+    var igdbId: Long = 0,
+
+    var name: String? = null,
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    var summary: String? = null,
+
+    @Column(columnDefinition = "TEXT")
+    var storyline: String? = null,
+
+    var aggregatedRating: Double? = null,
+
+    var franchiseIgdbId: Long? = null,
+
+    var franchiseName: String? = null,
+
+    var coverImageId: String? = null,
+    var firstReleaseDate: LocalDate? = null,
+    var lastFetchedAt: Instant? = null,
+
+    var viewCount: Long = 0,
+    var likeCount: Long = 0,
+    var reviewCount: Long = 0
+) {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "game_seq")
     @SequenceGenerator(name = "game_seq", sequenceName = "game_id_seq", allocationSize = 50)
-    @Setter(
-        AccessLevel.PROTECTED
-    )
-    private var id = 0
-
-    @Column(name = "igdb_id", nullable = false)
-    private var igdbId: Long = 0
-
-    private var name: String? = null
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private var summary: String? = null
-
-    @Column(columnDefinition = "TEXT")
-    private var storyline: String? = null
-
-    private var aggregatedRating: Double? = null
-
-    private var franchiseIgdbId: Long? = null
-
-    private var franchiseName: String? = null
-
-    private var coverImageId: String? = null
-    private var firstReleaseDate: LocalDate? = null
-    private var lastFetchedAt: Instant? = null
-
-    private var viewCount: Long = 0
-    private var likeCount: Long = 0
-    private var reviewCount: Long = 0
+    var id: Int = 0
+        protected set
 
 
     fun updateDetail(name: String?, summary: String?, coverImageId: String?, firstReleaseDateEpochSecond: Long?) {
@@ -66,49 +59,29 @@ class Game {
         name: String?, summary: String?, coverImageId: String?, firstReleaseDateEpochSecond: Long?,
         storyline: String?, aggregatedRating: Double?, franchiseIgdbId: Long?, franchiseName: String?
     ) {
-        this.name = name
-        this.summary = summary
-        this.coverImageId = coverImageId
-        this.firstReleaseDate = TimeUt.epoch.toLocalDate(firstReleaseDateEpochSecond)
-        this.lastFetchedAt = Instant.now()
+        updateDetail(name, summary, coverImageId, firstReleaseDateEpochSecond)
         this.storyline = storyline
         this.aggregatedRating = aggregatedRating
         this.franchiseIgdbId = franchiseIgdbId
         this.franchiseName = franchiseName
     }
 
-    fun incrementViewCount() {
-        this.viewCount++
+    fun incrementViewCount() { this.viewCount++ }
+    fun incrementLikeCount() { this.likeCount++ }
+    fun decrementLikeCount() { if (this.likeCount > 0) this.likeCount-- }
+    fun incrementReviewCount() { this.reviewCount++ }
+    fun decrementReviewCount() { if (this.reviewCount > 0) this.reviewCount-- }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is Game) return false
+        return id != 0 && id == other.id
     }
 
-    fun incrementLikeCount() {
-        this.likeCount++
-    }
-
-    fun decrementLikeCount() {
-        if (this.likeCount > 0) this.likeCount--
-    }
-
-    fun incrementReviewCount() {
-        this.reviewCount++
-    }
-
-    fun decrementReviewCount() {
-        if (this.reviewCount > 0) this.reviewCount--
-    }
-
-    override fun equals(o: Any?): Boolean {
-        if (o === this) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val that = o as Game
-        return id == that.id
-    }
-
-    override fun hashCode(): Int {
-        return Objects.hashCode(id)
-    }
+    override fun hashCode(): Int = Objects.hashCode(id)
 
     companion object {
+        // 기존 빌더 패턴 대신 사용할 정적 팩토리 메서드들
         @JvmStatic
         fun createGame(
             igdbId: Long,
@@ -120,21 +93,18 @@ class Game {
             aggregatedRating: Double?,
             franchiseIgdbId: Long?,
             franchiseName: String?
-        ): Game {
-            val g = Game()
-            g.igdbId = igdbId
-            g.name = name
-            g.summary = summary
-            g.coverImageId = imageId
-            g.firstReleaseDate = TimeUt.epoch.toLocalDate(firstReleaseDate)
-            g.lastFetchedAt = Instant.now()
-            g.storyline = storyline
-            g.aggregatedRating = aggregatedRating
-            g.franchiseIgdbId = franchiseIgdbId
-            g.franchiseName = franchiseName
-
-            return g
-        }
+        ): Game = Game(
+            igdbId = igdbId,
+            name = name,
+            summary = summary,
+            coverImageId = imageId,
+            firstReleaseDate = TimeUt.epoch.toLocalDate(firstReleaseDate),
+            storyline = storyline,
+            aggregatedRating = aggregatedRating,
+            franchiseIgdbId = franchiseIgdbId,
+            franchiseName = franchiseName,
+            lastFetchedAt = Instant.now()
+        )
 
         @JvmStatic
         fun createGame(
@@ -143,16 +113,13 @@ class Game {
             summary: String?,
             imageId: String?,
             firstReleaseDate: LocalDate?
-        ): Game {
-            val g = Game()
-            g.igdbId = igdbId
-            g.name = name
-            g.summary = summary
-            g.coverImageId = imageId
-            g.firstReleaseDate = firstReleaseDate
-            g.lastFetchedAt = Instant.now()
-
-            return g
-        }
+        ): Game = Game(
+            igdbId = igdbId,
+            name = name,
+            summary = summary,
+            coverImageId = imageId,
+            firstReleaseDate = firstReleaseDate,
+            lastFetchedAt = Instant.now()
+        )
     }
 }

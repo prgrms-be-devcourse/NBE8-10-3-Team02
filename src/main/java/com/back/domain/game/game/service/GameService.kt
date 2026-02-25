@@ -17,9 +17,9 @@ import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-@Service // 1. @RequiredArgsConstructor, @Slf4j 삭제
+@Service
 class GameService(
-    // 2. 생성자 주입 방식으로 변경 (null 허용 안 함)
+
     private val gameRepository: GameRepository,
     private val gameGenreRepository: GameGenreRepository,
     private val gamePlatformRepository: GamePlatformRepository,
@@ -29,12 +29,12 @@ class GameService(
     private val gameCacheService: GameCacheService,
     private val gameRecommendationService: GameRecommendationService
 ) {
-    // 3. 로그 객체 직접 선언
+
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun getIgdbPopularGames(limit: Int): List<PopularGameCardDto> {
         val cacheKey = "igdb_popular_$limit"
-        // 4. !! 대신 안전한 호출(?.)과 엘비스 연산자(?:) 사용
+
         return gameCacheService.getIgdbPopularGames(cacheKey) ?: run {
             val result = igdbPopularRightNowService.popularRightNow(limit)
             gameCacheService.putIgdbPopularGames(cacheKey, result)
@@ -130,10 +130,10 @@ class GameService(
         coverImage: String?,
         firstReleaseDate: LocalDate?
     ): Game {
-        // 1. LocalDate를 Long(초 단위)으로 변환
+
         val releaseTimestamp = firstReleaseDate?.atStartOfDay(java.time.ZoneOffset.UTC)?.toEpochSecond()
 
-        // 2. 엔티티의 createGame에 정의된 9개의 파라미터를 모두 채워줍니다.
+
         val game = Game.createGame(
             igdbId = igdbId,
             name = name,
