@@ -1,7 +1,6 @@
 package com.back.domain.game.game.dto;
 
 import com.back.global.igdb.dto.IgdbGameSummaryDto;
-import com.back.global.igdb.dto.IgdbPlatformDto;
 import com.back.standard.util.TimeUt;
 
 import com.back.global.igdb.util.IgdbImageUtil;
@@ -11,9 +10,6 @@ import java.util.List;
 
 import java.util.Map;
 import java.util.Objects;
-
-import static com.back.domain.game.platform.PlatformGroup.PLATFORM_MAP;
-import static com.back.domain.game.platform.PlatformGroup.DISPLAY_NAME;
 
 
 public record GameSearchResponse(
