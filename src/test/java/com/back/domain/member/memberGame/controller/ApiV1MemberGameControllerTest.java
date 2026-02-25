@@ -242,7 +242,7 @@ class ApiV1MemberGameControllerTest {
                 .andExpect(jsonPath("$.data.gameId").value(game.getId()))
                 .andExpect(jsonPath("$.data.platform").value("PC"))
                 .andExpect(jsonPath("$.data.status").value("PLAYING"))
-                .andExpect(jsonPath("$.data.isFavorite").value(false));
+                .andExpect(jsonPath("$.data.isFavorite").value(true));
     }
 
     @Test
