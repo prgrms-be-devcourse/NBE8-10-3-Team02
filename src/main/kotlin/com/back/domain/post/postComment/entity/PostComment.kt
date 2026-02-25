@@ -42,7 +42,7 @@ class PostComment(
     var children: MutableList<PostComment> = mutableListOf()
         protected set
 
-    var isDeleted: Boolean = false
+    var deleted: Boolean = false
         protected set
 
     // 2. 연관관계 편의 메서드 (대댓글 추가 시 양방향 연결)
@@ -57,6 +57,6 @@ class PostComment(
 
     fun markAsDeleted() {
         this.content = "삭제된 댓글입니다."
-        this.isDeleted = true
+        this.deleted = true
     }
 }

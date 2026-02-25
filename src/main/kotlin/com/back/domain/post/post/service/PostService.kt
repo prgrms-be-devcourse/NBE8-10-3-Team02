@@ -96,7 +96,7 @@ class PostService(
             parent?.children?.remove(postComment)
             postCommentRepository.delete(postComment)
 
-            if (parent != null && parent.isDeleted && parent.children.isEmpty()) {
+            if (parent != null && parent.deleted && parent.children.isEmpty()) {
                 postCommentRepository.delete(parent)
             }
         }

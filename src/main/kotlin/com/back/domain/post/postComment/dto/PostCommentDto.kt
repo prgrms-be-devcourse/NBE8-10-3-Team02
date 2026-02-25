@@ -20,10 +20,10 @@ data class PostCommentDto(
         id = postComment.id,
         authorId = postComment.author?.id ?: 0,
         authorName = postComment.author?.nickname,
-        content = if (postComment.isDeleted) "삭제된 댓글입니다." else postComment.content,
+        content = if (postComment.deleted) "삭제된 댓글입니다." else postComment.content,
         children = postComment.children.map { PostCommentDto(it) },
         parentId = postComment.parent?.id,
-        deleted = postComment.isDeleted,
+        deleted = postComment.deleted,
         createdDate = postComment.createDate,
         modifyDate = postComment.modifyDate,
         postId = postComment.post?.id ?: 0
