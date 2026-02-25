@@ -17,6 +17,7 @@ class CustomAuthenticationFilter(
     private val memberService: MemberService,
     private val rq: Rq,
 ) : OncePerRequestFilter() {
+
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val uri = request.requestURI
         return when {
@@ -45,56 +46,64 @@ class CustomAuthenticationFilter(
     }
 
     private fun work() {
+        // 1. 헤더나 쿠키에서 인증 데이터(토큰, API 키)를 먼저 추출합니다.
+        val (accessToken, apiKey) = extractAuthData()
+
+        if (accessToken.isBlank() && apiKey.isBlank()) return
+
+        // 2. AccessToken으로 먼저 인증을 시도하고, 실패하거나 없을 경우 ApiKey로 시도합니다.
+        if (authenticateByAccessToken(accessToken)) return
+        authenticateByApiKey(apiKey)
+    }
+
+    // [분리] 토큰 및 API 키 추출 로직
+    private fun extractAuthData(): Pair<String, String> {
         val authorization = rq.getHeader("Authorization", "")
-        var accessToken = ""
-        var apiKey = ""
 
-        // --- [자바 로직 복구: 토큰/API 키 추출] ---
-        if (authorization.isNotBlank()) {
-            if (!authorization.startsWith("Bearer ")) return
-
+        if (authorization.isNotBlank() && authorization.startsWith("Bearer ")) {
             val bits = authorization.split(" ")
-            if (bits.size == 2) {
-                accessToken = bits[1].trim()
-            } else if (bits.size == 3) {
-                apiKey = bits[1].trim()
-                accessToken = bits[2].trim()
-            }
-        } else {
-            apiKey = rq.getCookieValue("apiKey", "")
-            accessToken = rq.getCookieValue("accessToken", "")
-        }
-        // ------------------------------------------
-
-        if (apiKey.isBlank() && accessToken.isBlank()) return
-
-        // 1. accessToken 우선 검증
-        if (accessToken.isNotBlank()) {
-            memberService.payload(accessToken)?.let { payload ->
-                // as 대신 as?와 엘비스 연산자를 조합하여 안전하게 값을 가져옵니다.
-                val id = (payload["id"] as? Number)?.toInt() ?: 0
-                val email = payload["email"] as? String ?: ""
-                val nickname = payload["nickname"] as? String ?: ""
-
-                setAuthentication(id, email, nickname)
-                return
+            return when (bits.size) {
+                2 -> bits[1].trim() to ""
+                3 -> bits[2].trim() to bits[1].trim()
+                else -> "" to ""
             }
         }
 
-        // 2. apiKey로 시도
-        if (apiKey.isNotBlank()) {
-            memberService.findByApiKey(apiKey)?.let { member ->
-                setAuthentication(
-                    member.id,
-                    member.email ?: "",
-                    member.nickname ?: ""
-                )
+        return rq.getCookieValue("accessToken", "") to rq.getCookieValue("apiKey", "")
+    }
 
-                // 새 accessToken 발급 + 쿠키 갱신
-                val newAccessToken = memberService.genAccessToken(member)
-                rq.setCookie("accessToken", newAccessToken)
-            }
+    // [분리] AccessToken 기반 인증 처리
+    private fun authenticateByAccessToken(accessToken: String): Boolean {
+        if (accessToken.isBlank()) return false
+
+        memberService.payload(accessToken)?.let { payload ->
+            val id = (payload["id"] as? Number)?.toInt() ?: 0
+            val email = payload["email"] as? String ?: ""
+            val nickname = payload["nickname"] as? String ?: ""
+
+            setAuthentication(id, email, nickname)
+            return true
         }
+        return false
+    }
+
+    // [분리] ApiKey 기반 인증 처리
+    private fun authenticateByApiKey(apiKey: String): Boolean {
+        if (apiKey.isBlank()) return false
+
+        memberService.findByApiKey(apiKey)?.let { member ->
+            setAuthentication(
+                member.id,
+                member.email ?: "",
+                member.nickname ?: ""
+            )
+
+            // 새 토큰 발급 및 쿠키 갱신
+            val newAccessToken = memberService.genAccessToken(member)
+            rq.setCookie("accessToken", newAccessToken)
+            return true
+        }
+        return false
     }
 
     private fun setAuthentication(
@@ -104,12 +113,11 @@ class CustomAuthenticationFilter(
     ) {
         val user = SecurityUser(id, email, nickname, "", listOf())
 
-        val authentication =
-            UsernamePasswordAuthenticationToken(
-                user,
-                user.password,
-                user.authorities,
-            )
+        val authentication = UsernamePasswordAuthenticationToken(
+            user,
+            user.password,
+            user.authorities,
+        )
 
         SecurityContextHolder.getContext().authentication = authentication
     }
