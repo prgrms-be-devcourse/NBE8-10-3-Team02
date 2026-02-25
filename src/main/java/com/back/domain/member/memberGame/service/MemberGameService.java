@@ -31,8 +31,8 @@ public class MemberGameService {
 
     public MemberGame addToLibrary(String platformGroupName, double playtime, boolean isFavorite, StatusEnum status, Member member, Game game) {
         // Check for duplicate game in library
-        Optional<MemberGame> existingGame = memberGameRepository.findByMemberIdAndGameId(member.getId(), game.getId());
-        if (existingGame.isPresent()) {
+        MemberGame existingGame = memberGameRepository.findByMemberIdAndGameId(member.getId(), game.getId());
+        if (existingGame!= null) {
             throw new ServiceException("400-2", "이미 라이브러리에 존재하는 게임입니다.");
         }
         // Convert platform group name to platformId
@@ -54,7 +54,7 @@ public class MemberGameService {
     }
 
     public MemberGame findByMemberAndGame(int memberId, Long gameId) {
-        return memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
+        return Optional.ofNullable(memberGameRepository.findByMemberIdAndGameId(memberId, gameId))
                 .orElseThrow(() -> new ServiceException("404", "MemberGame not found"));
     }
 
@@ -95,7 +95,7 @@ public class MemberGameService {
     @Transactional
     public MemberGame updateReview(int memberId, Long gameId, Review review){
         //This also verifies ownership of the game
-        MemberGame memberGame = memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
+        MemberGame memberGame = Optional.ofNullable(memberGameRepository.findByMemberIdAndGameId(memberId, gameId))
                 .orElseThrow(() -> new ServiceException("404", "MemberGame not found"));
         memberGame.setReview(review);
         return memberGame;
