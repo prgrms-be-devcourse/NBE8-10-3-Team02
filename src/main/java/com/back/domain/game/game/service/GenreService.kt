@@ -8,15 +8,13 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional(readOnly = true)
 class GenreService(
-    private val genreRepository: GenreRepository
+    private val genreRepository: GenreRepository,
 ) {
-
-    fun getGenres(): List<GenreResponse> {
-        return genreRepository.findAll().map { genre ->
+    fun getGenres(): List<GenreResponse> =
+        genreRepository.findAll().map { genre ->
             GenreResponse(
                 id = genre.igdbId,
-                name = genre.name
+                name = genre.name,
             )
         }
-    }
 }

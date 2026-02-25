@@ -6,5 +6,5 @@ data class GameSearchCondition(
     var platformCode: String? = null,
     var platformIgdbIds: MutableList<Long?>? = null,
     var page: Int? = null,
-    var size: Int? = null
+    var size: Int? = null,
 )

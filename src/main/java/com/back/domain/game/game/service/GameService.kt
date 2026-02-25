@@ -1,9 +1,14 @@
 package com.back.domain.game.game.service
 
-import com.back.domain.game.game.dto.*
+import com.back.domain.game.game.dto.GameDetailResponse
+import com.back.domain.game.game.dto.GameVideoResponse
+import com.back.domain.game.game.dto.SimilarGameResponse
 import com.back.domain.game.game.entity.CompanyRole
 import com.back.domain.game.game.entity.Game
-import com.back.domain.game.game.repository.*
+import com.back.domain.game.game.repository.GameCompanyRepository
+import com.back.domain.game.game.repository.GameGenreRepository
+import com.back.domain.game.game.repository.GamePlatformRepository
+import com.back.domain.game.game.repository.GameRepository
 import com.back.domain.game.recommendation.service.GameRecommendationService
 import com.back.global.exception.ServiceException
 import com.back.global.igdb.IgdbDefensiveClient
@@ -14,11 +19,10 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
-import java.util.*
+import java.util.Optional
 
 @Service
 class GameService(
-
     private val gameRepository: GameRepository,
     private val gameGenreRepository: GameGenreRepository,
     private val gamePlatformRepository: GamePlatformRepository,
@@ -26,9 +30,8 @@ class GameService(
     private val igdbClient: IgdbDefensiveClient,
     private val igdbPopularRightNowService: IgdbPopularRightNowService,
     private val gameCacheService: GameCacheService,
-    private val gameRecommendationService: GameRecommendationService
+    private val gameRecommendationService: GameRecommendationService,
 ) {
-
     private val log = LoggerFactory.getLogger(javaClass)
 
     fun getIgdbPopularGames(limit: Int): List<PopularGameCardDto> {
@@ -46,33 +49,34 @@ class GameService(
         incrementViewCountInMemory(igdbId)
 
         return gameCacheService.getGameDetail(igdbId) ?: run {
-            val fromDb = gameRepository.findByIgdbId(igdbId)
-                .map { assembleDetails(it) }
-                .orElseThrow { ServiceException("404-1", "게임을 찾을 수 없습니다. $igdbId") }
+            val fromDb =
+                gameRepository
+                    .findByIgdbId(igdbId)
+                    .map { assembleDetails(it) }
+                    .orElseThrow { ServiceException("404-1", "게임을 찾을 수 없습니다. $igdbId") }
 
             gameCacheService.putGameDetail(igdbId, fromDb)
             fromDb
         }
     }
 
-    fun getVideoId(igdbId: Long): GameVideoResponse {
-        return gameCacheService.getVideo(igdbId) ?: run {
+    fun getVideoId(igdbId: Long): GameVideoResponse =
+        gameCacheService.getVideo(igdbId) ?: run {
             val fetched = fetchVideoId(igdbId)
             gameCacheService.putVideo(igdbId, fetched)
             fetched
         }
-    }
 
-    fun getSimilarGames(igdbId: Long): List<SimilarGameResponse> {
-        return gameCacheService.getSimilarList(igdbId) ?: run {
+    fun getSimilarGames(igdbId: Long): List<SimilarGameResponse> =
+        gameCacheService.getSimilarList(igdbId) ?: run {
             val recommendations = gameRecommendationService.getSimilarGames(igdbId, 10)
-            val result = recommendations.map { r ->
-                SimilarGameResponse(r.gameId().toLong(), r.name(), r.coverImageId())
-            }
+            val result =
+                recommendations.map { r ->
+                    SimilarGameResponse(r.gameId().toLong(), r.name(), r.coverImageId())
+                }
             gameCacheService.putSimilarList(igdbId, result)
             result
         }
-    }
 
     private fun fetchVideoId(igdbId: Long): GameVideoResponse {
         val dto = igdbClient.getVideoId(igdbId)
@@ -127,23 +131,22 @@ class GameService(
         name: String,
         summary: String,
         coverImage: String?,
-        firstReleaseDate: LocalDate?
+        firstReleaseDate: LocalDate?,
     ): Game {
-
         val releaseTimestamp = firstReleaseDate?.atStartOfDay(java.time.ZoneOffset.UTC)?.toEpochSecond()
 
-
-        val game = Game.createGame(
-            igdbId = igdbId,
-            name = name,
-            summary = summary,
-            imageId = coverImage,
-            firstReleaseDate = releaseTimestamp, // 변환된 Long 전달
-            storyline = null,        // 엔티티 정의에 있는 나머지 값들
-            aggregatedRating = null,
-            franchiseIgdbId = null,
-            franchiseName = null
-        )
+        val game =
+            Game.createGame(
+                igdbId = igdbId,
+                name = name,
+                summary = summary,
+                imageId = coverImage,
+                firstReleaseDate = releaseTimestamp, // 변환된 Long 전달
+                storyline = null, // 엔티티 정의에 있는 나머지 값들
+                aggregatedRating = null,
+                franchiseIgdbId = null,
+                franchiseName = null,
+            )
         return gameRepository.save(game)
     }
 }

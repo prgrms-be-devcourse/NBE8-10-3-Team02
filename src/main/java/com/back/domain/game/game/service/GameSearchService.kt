@@ -14,11 +14,9 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(readOnly = true)
 class GameSearchService(
     private val igdbService: IgdbService,
-    private val genreRepository: GenreRepository
+    private val genreRepository: GenreRepository,
 ) {
-
     fun search(condition: GameSearchCondition): List<GameSearchResponse> {
-
         val query = condition.query
         if (query.isNullOrBlank()) {
             throw ServiceException("400-2", "검색어를 입력해주세요.")
@@ -41,35 +39,35 @@ class GameSearchService(
             condition.platformIgdbIds = null
         }
 
+        val igdbGames =
+            try {
+                igdbService.search(condition)
+            } catch (e: Exception) {
+                throw ServiceException("502-1", "외부 게임 검색 서버 오류")
+            }
 
-        val igdbGames = try {
-            igdbService.search(condition)
-        } catch (e: Exception) {
-            throw ServiceException("502-1", "외부 게임 검색 서버 오류")
-        }
+        val genreIgdbIds =
+            igdbGames
+                .flatMap { it?.genres ?: emptyList() }
+                .filterNotNull()
+                .toSet()
 
+        val genreMap: MutableMap<Long?, String?> =
+            genreRepository
+                .findByIgdbIdIn(genreIgdbIds)
+                .associate { (it.igdbId as Long?) to (it.name as String?) }
+                .toMutableMap()
 
-        val genreIgdbIds = igdbGames
-            .flatMap { it?.genres ?: emptyList() }
-            .filterNotNull()
-            .toSet()
+        val platformIds =
+            igdbGames
+                .flatMap { it?.genres ?: emptyList() }
+                .toSet()
 
-
-        val genreMap: MutableMap<Long?, String?> = genreRepository.findByIgdbIdIn(genreIgdbIds)
-            .associate { (it.igdbId as Long?) to (it.name as String?) }
-            .toMutableMap()
-
-
-        val platformIds = igdbGames
-            .flatMap { it?.genres ?: emptyList() }
-            .toSet()
-
-
-        val platformMap: MutableMap<Long?, String?> = (igdbService.getPlatformNameMap(platformIds) ?: emptyMap())
-            .mapKeys { it.key as Long? }
-            .mapValues { it.value as String? }
-            .toMutableMap()
-
+        val platformMap: MutableMap<Long?, String?> =
+            (igdbService.getPlatformNameMap(platformIds) ?: emptyMap())
+                .mapKeys { it.key as Long? }
+                .mapValues { it.value as String? }
+                .toMutableMap()
 
         return igdbGames.map { d ->
 

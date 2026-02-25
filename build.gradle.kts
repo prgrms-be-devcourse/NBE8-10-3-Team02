@@ -64,7 +64,7 @@ dependencies {
 	// 1. QueryDSL 라이브러리
 	implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
 
-
+	// 2. QClass 생성을 위한 핵심 엔진
 	annotationProcessor("com.querydsl:querydsl-apt:5.1.0:jakarta")
 	annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 	annotationProcessor("jakarta.annotation:jakarta.annotation-api")

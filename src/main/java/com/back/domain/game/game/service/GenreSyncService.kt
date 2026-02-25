@@ -10,21 +10,23 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class GenreSyncService(
     private val igdbService: IgdbService,
-    private val genreRepository: GenreRepository
+    private val genreRepository: GenreRepository,
 ) {
     fun syncGenres() {
-
         val igdbGenres = igdbService.getGenres()
 
         val igdbIds = igdbGenres.map { it.id }
 
-        val existingIds = genreRepository.findByIgdbIdIn(igdbIds)
-            .map { it.igdbId }
-            .toSet()
+        val existingIds =
+            genreRepository
+                .findByIgdbIdIn(igdbIds)
+                .map { it.igdbId }
+                .toSet()
 
-        val newGenres = igdbGenres
-            .filter { dto -> !existingIds.contains(dto.id) }
-            .map { dto -> Genre(igdbId = dto.id, name = dto.name) }
+        val newGenres =
+            igdbGenres
+                .filter { dto -> !existingIds.contains(dto.id) }
+                .map { dto -> Genre(igdbId = dto.id, name = dto.name) }
 
         if (newGenres.isNotEmpty()) {
             genreRepository.saveAll(newGenres)
