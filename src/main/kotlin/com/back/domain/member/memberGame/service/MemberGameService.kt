@@ -4,6 +4,7 @@ import com.back.domain.game.game.entity.Game
 import com.back.domain.game.platform.PlatformGroup
 import com.back.domain.game.recommendation.event.ProfileVectorUpdateEvent
 import com.back.domain.member.member.entity.Member
+import com.back.domain.member.member.entity.QMember.member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.domain.member.memberGame.StatusEnum
 import com.back.domain.member.memberGame.dto.MemberGameUpdateRequest
@@ -28,7 +29,7 @@ class MemberGameService(
         platformGroupName: String,
         playtime: Double,
         isFavorite: Boolean,
-        status: StatusEnum,
+        status: StatusEnum?,
         member: Member,
         game: Game,
     ): MemberGame {
