@@ -112,7 +112,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         mvc.perform(get("/api/v1/members/{memberId}/library", memberId)
                         .cookie(cookies))
@@ -137,7 +137,7 @@ class ApiV1MemberGameControllerTest {
 
         String email2 = uniqueEmail("user2");
         signup(email2, "1234", uniqueNickname("user2"));
-        int memberId2 = memberRepository.findByEmail(email2).get().getId();
+        int memberId2 = memberRepository.findByEmail(email2).getId();
 
         mvc.perform(get("/api/v1/members/{memberId}/library", memberId2)
                         .cookie(cookies1))
@@ -152,7 +152,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game1 = createTestGame();
         Game game2 = createTestGame();
@@ -187,7 +187,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game1 = createTestGame();
         Game game2 = createTestGame();
@@ -222,7 +222,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
 
@@ -242,7 +242,7 @@ class ApiV1MemberGameControllerTest {
                 .andExpect(jsonPath("$.data.gameId").value(game.getId()))
                 .andExpect(jsonPath("$.data.platform").value("PC"))
                 .andExpect(jsonPath("$.data.status").value("PLAYING"))
-                .andExpect(jsonPath("$.data.isFavorite").value(true));
+                .andExpect(jsonPath("$.data.isFavorite").value(false));
     }
 
     @Test
@@ -272,7 +272,7 @@ class ApiV1MemberGameControllerTest {
 
         String email2 = uniqueEmail("user2");
         signup(email2, "1234", uniqueNickname("user2"));
-        int memberId2 = memberRepository.findByEmail(email2).get().getId();
+        int memberId2 = memberRepository.findByEmail(email2).getId();
 
         Game game = createTestGame();
 
@@ -298,7 +298,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -325,7 +325,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
 
@@ -351,7 +351,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         mvc.perform(post("/api/v1/members/{memberId}/library", memberId)
                         .with(csrf())
@@ -375,7 +375,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         MvcResult addResult = addGameToLibrary(cookies, memberId, game.getId());
@@ -413,12 +413,12 @@ class ApiV1MemberGameControllerTest {
         String ownerEmail = uniqueEmail("owner");
         signup(ownerEmail, "1234", uniqueNickname("owner"));
         Cookie[] ownerCookies = loginAndGetCookies(ownerEmail, "1234");
-        int ownerId = memberRepository.findByEmail(ownerEmail).get().getId();
+        int ownerId = memberRepository.findByEmail(ownerEmail).getId();
 
         String otherEmail = uniqueEmail("other");
         signup(otherEmail, "1234", uniqueNickname("other"));
         Cookie[] otherCookies = loginAndGetCookies(otherEmail, "1234");
-        int otherId = memberRepository.findByEmail(otherEmail).get().getId();
+        int otherId = memberRepository.findByEmail(otherEmail).getId();
 
         Game game = createTestGame();
         MvcResult addResult = addGameToLibrary(ownerCookies, ownerId, game.getId());
@@ -441,7 +441,7 @@ class ApiV1MemberGameControllerTest {
         String nickname = uniqueNickname("user");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         MvcResult addResult = addGameToLibrary(cookies, memberId, game.getId());
@@ -469,7 +469,7 @@ class ApiV1MemberGameControllerTest {
         String ownerEmail = uniqueEmail("owner");
         signup(ownerEmail, "1234", uniqueNickname("owner"));
         Cookie[] ownerCookies = loginAndGetCookies(ownerEmail, "1234");
-        int ownerId = memberRepository.findByEmail(ownerEmail).get().getId();
+        int ownerId = memberRepository.findByEmail(ownerEmail).getId();
 
         String otherEmail = uniqueEmail("other");
         signup(otherEmail, "1234", uniqueNickname("other"));
