@@ -21,7 +21,7 @@ class Genre(
     // 2. ID는 DB Identity 전략이므로 초기값 0으로 선언
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0
+    var id: Long? = null
 
     // 3. 기존 자바 코드와의 호환성을 위한 정적 메서드
     companion object {

@@ -4,39 +4,31 @@ import com.back.global.igdb.dto.IgdbGameSummaryDto
 import com.back.global.igdb.util.IgdbImageUtil
 import com.back.standard.util.TimeUt
 import java.time.LocalDate
-import java.util.*
+
 
 
 data class GameSearchResponse(
-    val igdbId: Long,
-    val name: String?,
+    val igdbId: Long,             // 자바 테스트에서 jsonPath("$.igdbId")로 확인 중이므로 유지
+    val name: String?,            // 자바 테스트에서 jsonPath("$.name")으로 확인 중이므로 유지
     val imageUrl: String?,
     val firstReleaseDate: LocalDate?,
-    val genres: MutableList<String?>?,
-    val platforms: MutableList<String?>? // developerName 추가예정
+    val genres: List<String?>?,   // MutableList보다 List가 자바 호환성이 좋습니다
+    val platforms: List<String?>?
 ) {
     companion object {
-        //    IGDB 조회용
         fun fromDto(
             d: IgdbGameSummaryDto,
-            genreMap: MutableMap<Long?, String?>,
-            platformMap: MutableMap<Long?, String?>
+            genreMap: Map<Long?, String?>,      // MutableMap일 필요 없음
+            platformMap: Map<Long?, String?>    // MutableMap일 필요 없음
         ): GameSearchResponse {
             return GameSearchResponse(
-                d.id,
-                d.name,
-                IgdbImageUtil.cover(
-                    if (d.cover != null) d.cover.imageId else null
-                ),
-                TimeUt.epoch.toLocalDate(d.firstReleaseDateEpochSeconds),  // 장르 null 체크
-                if (d.genres == null) mutableListOf<String?>() else d.genres.stream()
-                    .map<String?> { key: Long? -> genreMap.get(key) }
-                    .filter { obj: String? -> Objects.nonNull(obj) }
-                    .toList(),  // 플랫폼 null 체크
-                if (d.platforms == null) mutableListOf<String?>() else d.platforms.stream()
-                    .map<String?> { key: Long? -> platformMap.get(key) }
-                    .filter { obj: String? -> Objects.nonNull(obj) }
-                    .toList()
+                igdbId = d.id,
+                name = d.name,
+                imageUrl = IgdbImageUtil.cover(d.cover?.imageId),
+                firstReleaseDate = TimeUt.epoch.toLocalDate(d.firstReleaseDateEpochSeconds),
+                // 코틀린스러운 컬렉션 처리 (stream 대신 mapNotNull 사용)
+                genres = d.genres?.mapNotNull { genreMap[it] } ?: emptyList(),
+                platforms = d.platforms?.mapNotNull { platformMap[it] } ?: emptyList()
             )
         }
     }

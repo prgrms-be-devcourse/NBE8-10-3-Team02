@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-// 1. 롬복 제거 및 생성자 주입 (빨간 줄 해결의 핵심)
 @Transactional(readOnly = true)
 class GameSearchService(
     private val igdbService: IgdbService,
@@ -19,7 +18,7 @@ class GameSearchService(
 ) {
 
     fun search(condition: GameSearchCondition): List<GameSearchResponse> {
-        // 1. 입력 값 정규화 및 검증 (get/set 제거 -> 프로퍼티 접근)
+
         val query = condition.query
         if (query.isNullOrBlank()) {
             throw ServiceException("400-2", "검색어를 입력해주세요.")
@@ -42,14 +41,14 @@ class GameSearchService(
             condition.platformIgdbIds = null
         }
 
-        // 2. IGDB 검색 (!! 제거)
+
         val igdbGames = try {
             igdbService.search(condition)
         } catch (e: Exception) {
             throw ServiceException("502-1", "외부 게임 검색 서버 오류")
         }
 
-        // 3. 장르 매핑 (null인 ID들을 완전히 제거하고 넘겨줌)
+
         val genreIgdbIds = igdbGames
             .flatMap { it?.genres ?: emptyList() }
             .filterNotNull()
@@ -60,18 +59,18 @@ class GameSearchService(
             .associate { (it.igdbId as Long?) to (it.name as String?) }
             .toMutableMap()
 
-        // 4. 플랫폼 수집
+
         val platformIds = igdbGames
-            .flatMap { it?.genres ?: emptyList() } // d가 null일 경우 대비
+            .flatMap { it?.genres ?: emptyList() }
             .toSet()
 
-        // 플랫폼 맵도 타입을 강제로 맞춰줌
+
         val platformMap: MutableMap<Long?, String?> = (igdbService.getPlatformNameMap(platformIds) ?: emptyMap())
             .mapKeys { it.key as Long? }
             .mapValues { it.value as String? }
             .toMutableMap()
 
-        // 5. DTO 변환
+
         return igdbGames.map { d ->
 
             GameSearchResponse.fromDto(d!!, genreMap, platformMap)

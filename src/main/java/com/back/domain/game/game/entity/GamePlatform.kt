@@ -2,10 +2,7 @@ package com.back.domain.game.game.entity
 
 import jakarta.persistence.*
 
-/**
- * 게임과 플랫폼의 다대다 관계를 해소하기 위한 중간 엔티티입니다.
- * (gameId, platformId) 유니크 제약조건을 통해 중복 등록을 방지합니다.
- */
+
 @Entity
 @Table(
     name = "game_platform",
@@ -35,7 +32,8 @@ class GamePlatform(
         sequenceName = "game_platform_id_seq",
         allocationSize = 50
     )
-    val id: Long = 0
+    var id: Long?  = null
+    protected set
 
     // 3. 기존 자바의 createGamePlatform 정적 메서드 유지 (하위 호환성 및 명시적 생성)
     companion object {
