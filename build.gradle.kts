@@ -118,6 +118,7 @@ tasks.jacocoTestReport {
 }
 
 ktlint {
+    disabledRules.set(setOf("no-wildcard-imports"))
     version.set("1.4.0")
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)

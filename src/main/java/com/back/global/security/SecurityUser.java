@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.User;
 import java.util.Collection;
 
 public class SecurityUser extends User {
-    @Getter
     private final int id;
 
     @Getter
@@ -27,5 +26,9 @@ public class SecurityUser extends User {
         this.id = id;
         this.email = email;
         this.nickname = nickname;
+    }
+
+    public int getId() {
+        return this.id;
     }
 }
