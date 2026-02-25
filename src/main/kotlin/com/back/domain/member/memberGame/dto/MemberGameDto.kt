@@ -2,12 +2,13 @@ package com.back.domain.member.memberGame.dto
 
 import com.back.domain.member.memberGame.StatusEnum
 import com.back.domain.member.memberGame.entity.MemberGame
+import com.fasterxml.jackson.annotation.JsonProperty
 
 data class MemberGameDto(
     val id: Int,
     val platform: String?,
     val playtime: Double,
-    val isFavorite: Boolean,
+    @get:JsonProperty("isFavorite") val isFavorite: Boolean,
     val status: StatusEnum?,
     val gameId: Int,
     val igdbId: Long?,
