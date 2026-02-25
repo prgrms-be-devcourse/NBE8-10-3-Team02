@@ -156,6 +156,9 @@ jobs:
             const marker = '<!-- kotlin-migration-metrics -->';
 
             const body = `${marker}
+            <details>
+            <summary>📊 Kotlin 마이그레이션 메트릭 — ${progress}% 완료</summary>
+
             ## 📊 Kotlin 마이그레이션 메트릭
 
             ### 🚀 진행률: ${progress}%
@@ -202,6 +205,7 @@ jobs:
             - DTO에는 \`data class\` 사용하기
             - Builder 패턴 대신 named parameter 사용하기
             - 유틸리티 클래스 대신 확장 함수 사용하기
+            </details>
             `.replace(/^            /gm, '');
 
             const { data: comments } = await github.rest.issues.listComments({
