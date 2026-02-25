@@ -136,7 +136,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("reviewer");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         mvc.perform(get("/api/v1/reviews/member/{memberId}", memberId)
                         .cookie(cookies))
@@ -163,7 +163,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("reviewer");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -200,7 +200,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("writer");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -271,7 +271,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("writer");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -342,7 +342,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("myreview");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -386,13 +386,13 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("modifier");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
 
         writeReview(cookies, game.getId(), "Original Title", "Original Content", 3.0);
-        Member author = memberRepository.findByEmail(email).get();
+        Member author = memberRepository.findByEmail(email);
         int reviewId = reviewRepository.findByAuthorAndGame(author, game).get().getId();
 
         mvc.perform(put("/api/v1/reviews/{id}", reviewId)
@@ -453,7 +453,7 @@ class ApiV1ReviewControllerTest {
         String writerNickname = uniqueNickname("writer");
         signup(writerEmail, "1234", writerNickname);
         Cookie[] writerCookies = loginAndGetCookies(writerEmail, "1234");
-        int writerId = memberRepository.findByEmail(writerEmail).get().getId();
+        int writerId = memberRepository.findByEmail(writerEmail).getId();
 
         String otherEmail = uniqueEmail("other");
         String otherNickname = uniqueNickname("other");
@@ -487,7 +487,7 @@ class ApiV1ReviewControllerTest {
         String nickname = uniqueNickname("deleter");
         signup(email, "1234", nickname);
         Cookie[] cookies = loginAndGetCookies(email, "1234");
-        int memberId = memberRepository.findByEmail(email).get().getId();
+        int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
         addGameToLibrary(cookies, memberId, game.getId());
@@ -518,7 +518,7 @@ class ApiV1ReviewControllerTest {
         String writerNickname = uniqueNickname("writer");
         signup(writerEmail, "1234", writerNickname);
         Cookie[] writerCookies = loginAndGetCookies(writerEmail, "1234");
-        int writerId = memberRepository.findByEmail(writerEmail).get().getId();
+        int writerId = memberRepository.findByEmail(writerEmail).getId();
 
         String otherEmail = uniqueEmail("other");
         String otherNickname = uniqueNickname("other");

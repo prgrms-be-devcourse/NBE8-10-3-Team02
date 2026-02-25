@@ -22,11 +22,11 @@ data class MemberGameDto(
         playtime = memberGame.playtime,
         isFavorite = memberGame.isFavorite,
         status = memberGame.status,
-        gameId = memberGame.game.id,
-        igdbId = memberGame.game.igdbId,
-        gameName = memberGame.game.name,
-        coverImageId = memberGame.game.coverImageId,
+        gameId = memberGame.game.getId(),
+        igdbId = memberGame.game.getIgdbId(),
+        gameName = memberGame.game.getName(),
+        coverImageId = memberGame.game.getCoverImageId(),
         reviewId = memberGame.review?.id,
-        rating = memberGame.review?.rating
+        rating = memberGame.review?.getRating()
     )
 }
