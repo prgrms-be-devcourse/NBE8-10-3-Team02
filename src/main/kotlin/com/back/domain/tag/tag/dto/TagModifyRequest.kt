@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank
 
 data class TagModifyRequest(
     @field:NotBlank
-    val content: String
+    val content: String,
 )

@@ -13,7 +13,7 @@ data class PostCommentDto(
     val deleted: Boolean,
     val createdDate: LocalDateTime?,
     val modifyDate: LocalDateTime?,
-    val postId: Int
+    val postId: Int,
 ) {
     // 자바의 생성자 로직을 부 생성자(constructor)로 구현
     constructor(postComment: PostComment) : this(
@@ -26,6 +26,6 @@ data class PostCommentDto(
         deleted = postComment.deleted,
         createdDate = postComment.createDate,
         modifyDate = postComment.modifyDate,
-        postId = postComment.post?.id ?: 0
+        postId = postComment.post?.id ?: 0,
     )
 }

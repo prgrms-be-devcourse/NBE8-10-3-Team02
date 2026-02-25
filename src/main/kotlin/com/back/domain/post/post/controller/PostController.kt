@@ -13,21 +13,28 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.web.PageableDefault
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/posts")
 class PostController(
     private val postService: PostService,
     private val memberService: MemberService,
-    private val rq: Rq
+    private val rq: Rq,
 ) {
-
     @GetMapping
     fun getItems(
         @RequestParam(value = "kw", defaultValue = "") kw: String,
         @RequestParam(value = "tag", defaultValue = "") tag: String,
-        @PageableDefault(size = 10, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable
+        @PageableDefault(size = 10, sort = ["id"], direction = Sort.Direction.DESC) pageable: Pageable,
     ): RsData<Page<PostDto>> {
         val page = postService.search(kw, tag, pageable)
         val postDtos = page.map { PostDto(it) }
@@ -36,21 +43,25 @@ class PostController(
     }
 
     @GetMapping("/{id}")
-    fun getItem(@PathVariable id: Int): PostDto {
-        val post = postService.findById(id)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+    fun getItem(
+        @PathVariable id: Int,
+    ): PostDto {
+        val post =
+            postService.findById(id)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
         return PostDto(post)
     }
 
     @PostMapping
     fun create(
-        @RequestBody @Valid request: PostCreateRequest
+        @RequestBody @Valid request: PostCreateRequest,
     ): RsData<PostDto> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
-        val author = memberService.findById(actor.id)
-            ?:throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
+        val author =
+            memberService.findById(actor.id)
+                ?: throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
 
         val post = postService.write(author, request.title, request.content, request.tags)
 
@@ -60,15 +71,17 @@ class PostController(
     @PutMapping("/{id}")
     fun modify(
         @PathVariable id: Int,
-        @RequestBody @Valid request: PostModifyRequest
+        @RequestBody @Valid request: PostModifyRequest,
     ): RsData<PostDto> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
-        val post = postService.findById(id)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+        val post =
+            postService.findById(id)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val author = memberService.findById(actor.id)
-            ?:throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
+        val author =
+            memberService.findById(actor.id)
+                ?: throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
 
         postService.checkPermission(post, author)
         postService.modify(post, request)
@@ -78,15 +91,17 @@ class PostController(
 
     @DeleteMapping("/{id}")
     fun delete(
-        @PathVariable id: Int
+        @PathVariable id: Int,
     ): RsData<Unit> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
-        val post = postService.findById(id)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+        val post =
+            postService.findById(id)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val author = memberService.findById(actor.id)
-            ?:throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
+        val author =
+            memberService.findById(actor.id)
+                ?: throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
 
         postService.checkPermission(post, author)
         postService.delete(post)
@@ -96,7 +111,7 @@ class PostController(
 
     @PostMapping("/{id}/like")
     fun toggleLike(
-        @PathVariable id: Int
+        @PathVariable id: Int,
     ): RsData<Long> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 

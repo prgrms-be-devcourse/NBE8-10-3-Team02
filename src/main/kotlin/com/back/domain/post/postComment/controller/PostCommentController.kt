@@ -13,22 +13,31 @@ import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/posts/{postId}/comments")
 class PostCommentController(
     private val postService: PostService,
     private val postCommentRepository: PostCommentRepository,
-    private val memberService: MemberService
+    private val memberService: MemberService,
 ) {
-
     @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "다건 조회")
-    fun getItems(@PathVariable postId: Int): List<PostCommentDto> {
-        val post = postService.findById(postId)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+    fun getItems(
+        @PathVariable postId: Int,
+    ): List<PostCommentDto> {
+        val post =
+            postService.findById(postId)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
         return post.comments.map { PostCommentDto(it) }
     }
@@ -38,13 +47,15 @@ class PostCommentController(
     @Operation(summary = "단건 조회")
     fun getItem(
         @PathVariable postId: Int,
-        @PathVariable id: Int
+        @PathVariable id: Int,
     ): PostCommentDto {
-        val post = postService.findById(postId)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+        val post =
+            postService.findById(postId)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val postComment = post.findCommentById(id)
-            ?: throw ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.")
+        val postComment =
+            post.findCommentById(id)
+                ?: throw ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.")
 
         return PostCommentDto(postComment)
     }
@@ -55,14 +66,16 @@ class PostCommentController(
     fun delete(
         @PathVariable postId: Int,
         @PathVariable id: Int,
-        @AuthenticationPrincipal user: SecurityUser
+        @AuthenticationPrincipal user: SecurityUser,
     ): RsData<Unit> {
         // postId 검증 (존재 여부 확인)
         postService.findById(postId)
             ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val postComment = postCommentRepository.findById(id)
-            .orElseThrow { ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.") }
+        val postComment =
+            postCommentRepository
+                .findById(id)
+                .orElseThrow { ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.") }
 
         if (postComment.author.id != user.id) {
             throw ServiceException("403-1", "자신의 댓글만 삭제할 수 있습니다.")
@@ -80,13 +93,15 @@ class PostCommentController(
         @PathVariable postId: Int,
         @PathVariable id: Int,
         @AuthenticationPrincipal user: SecurityUser,
-        @Valid @RequestBody reqBody: PostCommentModifyRequest
+        @Valid @RequestBody reqBody: PostCommentModifyRequest,
     ): RsData<Unit> {
-        val post = postService.findById(postId)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+        val post =
+            postService.findById(postId)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val postComment = post.findCommentById(id)
-            ?: throw ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.")
+        val postComment =
+            post.findCommentById(id)
+                ?: throw ServiceException("404-2", "해당 댓글을 찾을 수 없습니다.")
 
         if (postComment.author.id != user.id) {
             throw ServiceException("403-1", "자신의 댓글만 수정할 수 있습니다.")
@@ -103,26 +118,32 @@ class PostCommentController(
     fun write(
         @PathVariable postId: Int,
         @AuthenticationPrincipal user: SecurityUser?,
-        @Valid @RequestBody reqBody: PostCommentCreateRequest
+        @Valid @RequestBody reqBody: PostCommentCreateRequest,
     ): RsData<PostCommentDto> {
         val loginUser = user ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
-        val post = postService.findById(postId)
-            ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
+        val post =
+            postService.findById(postId)
+                ?: throw ServiceException("404-1", "해당 게시글을 찾을 수 없습니다.")
 
-        val author = memberService.findById(loginUser.id)
-            ?:throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
+        val author =
+            memberService.findById(loginUser.id)
+                ?: throw ServiceException("404-1", "회원 정보를 찾을 수 없습니다.")
 
-        val postComment = postService.writeComment(
-            author, post, reqBody.content, reqBody.parentId
-        )
+        val postComment =
+            postService.writeComment(
+                author,
+                post,
+                reqBody.content,
+                reqBody.parentId,
+            )
 
         postService.flush()
 
         return RsData(
             "201-1",
             "${postComment.id}번 댓글이 작성되었습니다.",
-            PostCommentDto(postComment)
+            PostCommentDto(postComment),
         )
     }
 }

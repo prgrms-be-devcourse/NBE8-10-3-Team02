@@ -5,7 +5,12 @@ import com.back.domain.post.postComment.entity.PostComment
 import com.back.domain.tag.postTag.entity.PostTag
 import com.back.domain.tag.tag.entity.Tag
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
@@ -14,15 +19,10 @@ import java.time.LocalDateTime
 class Post(
     @ManyToOne(fetch = FetchType.LAZY)
     var author: Member,
-
     var title: String,
-
     @Column(columnDefinition = "TEXT")
-    var content: String
-
-
+    var content: String,
 ) : BaseEntity() {
-
     @CreatedDate
     @Column(updatable = false)
     var createDate: LocalDateTime? = null
@@ -35,7 +35,9 @@ class Post(
     // 기본 생성자 (JPA용)
     constructor() : this(
         // 자바 Member에 있는 생성자 중 아무거나 형식을 맞춥니다.
-        Member("temp", "temp", "temp"), "", ""
+        Member("temp", "temp", "temp"),
+        "",
+        "",
     )
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
@@ -55,29 +57,33 @@ class Post(
         protected set
 
     companion object {
-        fun create(author: Member, title: String, content: String): Post {
-            return Post(author, title, content)
-        }
+        fun create(
+            author: Member,
+            title: String,
+            content: String,
+        ): Post = Post(author, title, content)
     }
 
-    fun modify(title: String, content: String) {
+    fun modify(
+        title: String,
+        content: String,
+    ) {
         this.title = title
         this.content = content
     }
 
-    fun addComment(author: Member, content: String): PostComment {
+    fun addComment(
+        author: Member,
+        content: String,
+    ): PostComment {
         val postComment = PostComment(author, this, content)
         comments.add(postComment)
         return postComment
     }
 
-    fun findCommentById(id: Int): PostComment? {
-        return comments.find { it.id == id }
-    }
+    fun findCommentById(id: Int): PostComment? = comments.find { it.id == id }
 
-    fun deleteComment(postComment: PostComment?): Boolean {
-        return postComment?.let { comments.remove(it) } ?: false
-    }
+    fun deleteComment(postComment: PostComment?): Boolean = postComment?.let { comments.remove(it) } ?: false
 
     fun addTag(tag: Tag) {
         val postTag = PostTag(this, tag)

@@ -6,14 +6,13 @@ import com.back.global.exception.ServiceException
 import com.back.global.igdb.IgdbDefensiveClient
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.*
+import java.util.Optional
 
 @Service
 class TagService(
     private val tagRepository: TagRepository,
-    private val igdbClient: IgdbDefensiveClient
+    private val igdbClient: IgdbDefensiveClient,
 ) {
-
     @Transactional
     fun create(content: String): Tag {
         tagRepository.findByContent(content).ifPresent {
@@ -32,21 +31,21 @@ class TagService(
     }
 
     /* fun modify(tag: Tag, content: String) {
-        tag.content = content 
+        tag.content = content
     }
-    */
+     */
 
-    fun getOrCreate(content: String): Tag {
-        return tagRepository.findByContent(content).orElseGet {
+    fun getOrCreate(content: String): Tag =
+        tagRepository.findByContent(content).orElseGet {
             tagRepository.save(Tag(content))
         }
-    }
 
     // IGDB에서 게임 제목을 태그로 가져옴
     @Transactional
     fun createTagsFromIgdb(igdbId: Long): List<Tag> {
-        val game = igdbClient.getGameName(igdbId) 
-            ?: throw ServiceException("404-3", "IGDB에서 정보를 찾을 수 없습니다.")
+        val game =
+            igdbClient.getGameName(igdbId)
+                ?: throw ServiceException("404-3", "IGDB에서 정보를 찾을 수 없습니다.")
 
         return listOf(getOrCreate(game.name))
     }

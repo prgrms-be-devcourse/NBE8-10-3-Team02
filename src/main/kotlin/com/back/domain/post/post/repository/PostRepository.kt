@@ -8,17 +8,18 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface PostRepository : JpaRepository<Post, Int> {
-
-    @Query("""
+    @Query(
+        """
         SELECT DISTINCT p FROM Post p 
         LEFT JOIN p.postTags pt 
         LEFT JOIN pt.tag t 
         WHERE (:kw IS NULL OR p.title LIKE CONCAT('%', :kw, '%')) 
         AND (:tag IS NULL OR t.content LIKE CONCAT('%', :tag, '%'))
-    """)
+    """,
+    )
     fun search(
-        @Param("kw") kw: String?, 
-        @Param("tag") tag: String?, 
-        pageable: Pageable
+        @Param("kw") kw: String?,
+        @Param("tag") tag: String?,
+        pageable: Pageable,
     ): Page<Post>
 }

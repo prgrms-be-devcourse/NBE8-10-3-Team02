@@ -13,7 +13,7 @@ data class PostDto(
     val modifyDate: LocalDateTime?,
     val tags: List<String>,
     val viewCount: Int,
-    val likeCount: Long
+    val likeCount: Long,
 ) {
     // 자바의 보조 생성자 역할을 하는 companion object나 부 생성자(constructor)
     constructor(post: Post) : this(
@@ -26,6 +26,6 @@ data class PostDto(
         modifyDate = post.modifyDate,
         tags = post.postTags?.map { it.tag.content } ?: emptyList(),
         viewCount = post.viewCount,
-        likeCount = post.postLikes?.size?.toLong() ?: 0L
+        likeCount = post.postLikes?.size?.toLong() ?: 0L,
     )
 }

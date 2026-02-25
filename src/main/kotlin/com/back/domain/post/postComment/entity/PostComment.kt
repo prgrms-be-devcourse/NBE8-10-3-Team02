@@ -3,7 +3,13 @@ package com.back.domain.post.postComment.entity
 import com.back.domain.member.member.entity.Member
 import com.back.domain.post.post.entity.Post
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import java.time.LocalDateTime
@@ -11,21 +17,17 @@ import java.time.LocalDateTime
 @Entity
 class PostComment(
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id") // 명시적 조인 컬럼 추가
+    @JoinColumn(name = "author_id")
     var author: Member,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     var post: Post,
-
-    @Column(columnDefinition = "TEXT") // 댓글은 내용이 길어질 수 있으므로 TEXT 권장
+    @Column(columnDefinition = "TEXT")
     var content: String,
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    var parent: PostComment? = null
+    var parent: PostComment? = null,
 ) : BaseEntity() {
-
     // 1. JPA No-Arg Constructor (가짜 인자 최소화)
     protected constructor() : this(Member(), Post(), "")
 
