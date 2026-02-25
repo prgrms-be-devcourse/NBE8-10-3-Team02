@@ -6,5 +6,5 @@ data class MemberGameUpdateRequest(
     val platform: String?,
     val playtime: Double?,
     val isFavorite: Boolean?,
-    val status: StatusEnum?
+    val status: StatusEnum?,
 )

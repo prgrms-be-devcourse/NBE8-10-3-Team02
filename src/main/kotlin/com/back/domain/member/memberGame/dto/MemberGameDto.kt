@@ -15,7 +15,7 @@ data class MemberGameDto(
     val gameName: String?,
     val coverImageId: String?,
     val reviewId: Int?,
-    val rating: Double?
+    val rating: Double?,
 ) {
     constructor(memberGame: MemberGame) : this(
         id = memberGame.id,
@@ -28,6 +28,6 @@ data class MemberGameDto(
         gameName = memberGame.game.getName(),
         coverImageId = memberGame.game.getCoverImageId(),
         reviewId = memberGame.review?.id,
-        rating = memberGame.review?.getRating()
+        rating = memberGame.review?.getRating(),
     )
 }

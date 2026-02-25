@@ -17,9 +17,8 @@ open class MemberGame(
     var isFavorite: Boolean,
     @field:Enumerated(EnumType.STRING) var status: StatusEnum?,
     @field:ManyToOne(fetch = FetchType.LAZY) var member: Member,
-    @field:ManyToOne(fetch = FetchType.LAZY) var game: Game
+    @field:ManyToOne(fetch = FetchType.LAZY) var game: Game,
 ) : BaseEntity() {
-
     @OneToOne(fetch = FetchType.LAZY)
     var review: Review? = null
 
@@ -27,8 +26,9 @@ open class MemberGame(
         get() = PlatformGroup.getGroupName(platformId)
 
     fun checkActorCanAccess(actor: Member) {
-        if (member.id != actor.id)
+        if (member.id != actor.id) {
             throw ServiceException("403-1", "${member.id}번 게임에 대한 권한이 없습니다.")
+        }
     }
 
     fun setPlatformByGroupName(groupName: String?) {
