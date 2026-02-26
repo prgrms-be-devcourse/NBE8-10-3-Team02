@@ -1,8 +1,20 @@
 package com.back.global.igdb
 
 import com.back.domain.game.game.dto.SimilarGameResponse
-import com.back.global.igdb.dto.*
+import com.back.global.igdb.dto.GameRow
+import com.back.global.igdb.dto.IgdbGameBriefDto
+import com.back.global.igdb.dto.IgdbGameDetailDto
+import com.back.global.igdb.dto.IgdbGameNameDto
+import com.back.global.igdb.dto.IgdbGameSummaryDto
+import com.back.global.igdb.dto.IgdbGenreDto
+import com.back.global.igdb.dto.IgdbPopularGameDto
+import com.back.global.igdb.dto.IgdbPopularityPrimitiveDto
+import com.back.global.igdb.dto.IgdbSimilarIdsDto
+import com.back.global.igdb.dto.IgdbVideoDto
 import org.springframework.stereotype.Component
+import kotlin.collections.isEmpty
+import kotlin.collections.map
+import kotlin.collections.toList
 
 /**
  * API 경로 전용 IGDB 클라이언트 (IgdbRequestExecutor 사용).

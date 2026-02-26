@@ -2,13 +2,18 @@ package com.back.global.igdb.service
 
 import com.back.global.igdb.IgdbDefensiveClient
 import com.back.global.igdb.IgdbRequestExecutor
-import com.back.global.igdb.dto.*
+import com.back.global.igdb.dto.MultiQueryBlock
+import com.back.global.igdb.dto.PopularGameCardDto
+import com.back.global.igdb.dto.PopularityLists
+import com.back.global.igdb.dto.PopularityPrimitiveRow
+import com.back.global.igdb.dto.Weights
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
+import kotlin.collections.isNullOrEmpty
 
 @Service
 class IgdbPopularRightNowService(

@@ -1,6 +1,10 @@
 package com.back.domain.game.recommendation.service
 
-import com.back.domain.game.game.entity.*
+import com.back.domain.game.game.entity.GameMode
+import com.back.domain.game.game.entity.Genre
+import com.back.domain.game.game.entity.Keyword
+import com.back.domain.game.game.entity.PlayerPerspective
+import com.back.domain.game.game.entity.Theme
 import com.back.global.vector.VectorDimensionMapper
 import org.springframework.stereotype.Service
 

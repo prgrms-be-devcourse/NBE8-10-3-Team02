@@ -3,7 +3,14 @@ package com.back.domain.game.gameLike.entity
 import com.back.domain.game.game.entity.Game
 import com.back.domain.member.member.entity.Member
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.Index
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.persistence.UniqueConstraint
 import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
 
