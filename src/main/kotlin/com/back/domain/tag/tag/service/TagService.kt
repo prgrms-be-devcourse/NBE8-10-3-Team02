@@ -47,9 +47,11 @@ class TagService(
             igdbClient.getGameName(igdbId)
                 ?: throw ServiceException("404-3", "IGDB에서 정보를 찾을 수 없습니다.")
 
-        val name = game.name?.trim()
-            ?.takeIf { it.isNotBlank() }
-            ?: throw ServiceException("404-3", "IGDB 게임 이름이 비어있습니다.")
+        val name =
+            game.name
+                ?.trim()
+                ?.takeIf { it.isNotBlank() }
+                ?: throw ServiceException("404-3", "IGDB 게임 이름이 비어있습니다.")
 
         return listOf(getOrCreate(name))
     }
