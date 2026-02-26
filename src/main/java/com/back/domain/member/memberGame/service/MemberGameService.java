@@ -53,7 +53,7 @@ public class MemberGameService {
         return removed;
     }
 
-    public MemberGame findByMemberAndGame(int memberId, int gameId) {
+    public MemberGame findByMemberAndGame(int memberId, Long gameId) {
         return memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
                 .orElseThrow(() -> new ServiceException("404", "MemberGame not found"));
     }
@@ -93,7 +93,7 @@ public class MemberGameService {
     }
 
     @Transactional
-    public MemberGame updateReview(int memberId, int gameId, Review review){
+    public MemberGame updateReview(int memberId, Long gameId, Review review){
         MemberGame memberGame = memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
                 .orElseThrow(() -> new ServiceException("404", "MemberGame not found"));
         // Verify ownership

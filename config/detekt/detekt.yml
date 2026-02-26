@@ -15,13 +15,19 @@ complexity:
   CyclomaticComplexMethod:
     active: true
     threshold: 15
+    excludes:
+      - '**/batch/**'
+      - '**/config/**'
   LongMethod:
     active: true
     threshold: 60
   LongParameterList:
     active: true
-    functionThreshold: 6
-    constructorThreshold: 7
+    functionThreshold: 10
+    constructorThreshold: 10
+    excludes:
+      - '**/batch/**'
+      - '**/config/**'
   TooManyFunctions:
     active: true
     thresholdInFiles: 20

@@ -37,7 +37,7 @@ jobs:
       # ktlint — generates checkstyle XML, piped to reviewdog
       - name: Run ktlint
         id: ktlint
-        run: ./gradlew ktlintCheck
+        run: ./gradlew ktlintCheck --continue
         continue-on-error: true
 
       - name: reviewdog (ktlint)
