@@ -39,6 +39,9 @@ out/
 ### QueryDSL ###
 src/main/generated/
 
+### Kotlin/IDE local artifacts ###
+.kotlin/
+
 ### Custom ###
 db_dev.mv.db
 db_dev.trace.db
@@ -47,4 +50,3 @@ nul
 .claude/
 docs/
 *.md
-.kotlin/errors/
