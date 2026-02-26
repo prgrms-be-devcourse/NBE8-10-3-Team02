@@ -25,9 +25,7 @@ class ApiV1RecommendationController(
     fun getRecommendations(
         @RequestParam(defaultValue = "20") limit: Int,
     ): RsData<List<GameRecommendationResponse>> {
-        val actor =
-            rq.getActor()
-                ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
         val recommendations = gameRecommendationService.getPersonalRecommendations(actor.id, limit)
         return RsData("200-1", "추천 게임 조회 성공", recommendations)

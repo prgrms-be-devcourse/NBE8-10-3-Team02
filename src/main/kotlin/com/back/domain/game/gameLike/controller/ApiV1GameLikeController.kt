@@ -25,9 +25,7 @@ class ApiV1GameLikeController(
     fun toggleLike(
         @PathVariable igdbId: Long,
     ): RsData<GameLikeResponse> {
-        val actor =
-            rq.getActor()
-                ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
 
         val liked = gameLikeService.toggleLike(actor, igdbId)
         val likeCount = gameLikeService.getLikeCount(igdbId)
@@ -41,7 +39,7 @@ class ApiV1GameLikeController(
     fun getLikeStatus(
         @PathVariable igdbId: Long,
     ): GameLikeResponse {
-        val actor = rq.getActor()
+        val actor = rq.actor
         val liked = gameLikeService.isLiked(actor, igdbId)
         val likeCount = gameLikeService.getLikeCount(igdbId)
         return GameLikeResponse.from(igdbId, liked, likeCount)
