@@ -44,7 +44,8 @@ class ApiV1MemberGameController(
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) platform: String?,
     ): RsData<Page<MemberGameDto>> {
-        if (memberId != rq.actor.id) throw ServiceException("403", "Cannot view this library")
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        if (memberId != actor.id) throw ServiceException("403", "Cannot view this library")
 
         val statusEnum = status?.let { runCatching { StatusEnum.valueOf(it) }.getOrNull() }
 
@@ -64,9 +65,10 @@ class ApiV1MemberGameController(
         @PathVariable memberId: Int,
         @RequestBody request: MemberGameAddRequest,
     ): RsData<MemberGameDto> {
-        if (memberId != rq.actor.id) throw ServiceException("403", "Cannot add to this library")
+        val actorPrincipal = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        if (memberId != actorPrincipal.id) throw ServiceException("403", "Cannot add to this library")
 
-        val actor = memberService.findById(rq.actor.id) ?: throw NoSuchElementException()
+        val actor = memberService.findById(actorPrincipal.id) ?: throw NoSuchElementException()
         val game = gameService.findById(request.gameId).orElseThrow { ServiceException("404-1", "No Game") }
         val memberGame = memberGameService.addToLibrary(request, actor, game)
         memberService.flush()
@@ -81,7 +83,8 @@ class ApiV1MemberGameController(
         @PathVariable memberGameId: Int,
         @Valid @RequestBody request: MemberGameUpdateRequest,
     ): RsData<MemberGameDto> {
-        if (memberId != rq.actor.id) throw ServiceException("403", "Cannot update this library")
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        if (memberId != actor.id) throw ServiceException("403", "Cannot update this library")
 
         val memberGame = memberGameService.updateMemberGame(memberGameId, memberId, request)
         return RsData("200", "게임 정보가 업데이트되었습니다.", MemberGameDto(memberGame))
@@ -94,7 +97,7 @@ class ApiV1MemberGameController(
         @PathVariable memberId: Int,
         @PathVariable memberGameId: Int,
     ): RsData<Void> {
-        val actor = rq.actor
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         if (memberId != actor.id) throw ServiceException("403", "Cannot delete from this library")
 
         val member = memberService.findById(actor.id) ?: throw NoSuchElementException()

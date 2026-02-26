@@ -85,7 +85,7 @@ class ApiV1ReviewController(
     fun write(
         @Valid @RequestBody reqBody: ReviewWriteRequest,
     ): RsData<ReviewDto> {
-        val actor = rq.actor
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         val game = gameService.findById(reqBody.gameId).orElseThrow { ServiceException("404-1", "No Game") }
         val review = reviewService.write(reqBody.title, reqBody.content, reqBody.rating, actor, game)
         memberGameService.updateReview(actor.id, game.getId(), review)
@@ -98,7 +98,7 @@ class ApiV1ReviewController(
     fun getMyGameReview(
         @PathVariable gameId: Int,
     ): RsData<ReviewDto> {
-        val actor = rq.actor
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         val game =
             gameService.findById(gameId).orElseThrow {
                 ServiceException("404-1", "해당 게임이 존재하지 않습니다.")
@@ -116,7 +116,8 @@ class ApiV1ReviewController(
         @PathVariable id: Int,
         @Valid @RequestBody reqBody: ReviewModifyRequest,
     ): RsData<ReviewDto> {
-        val actor = memberService.findById(rq.actor.id) ?: throw NoSuchElementException()
+        val actorPrincipal = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
+        val actor = memberService.findById(actorPrincipal.id) ?: throw NoSuchElementException()
         val review = reviewService.findById(id) ?: throw NoSuchElementException()
         review.checkActorCanModify(actor)
         reviewService.modify(review, reqBody.title, reqBody.content, reqBody.rating)
@@ -129,7 +130,7 @@ class ApiV1ReviewController(
     fun delete(
         @PathVariable id: Int,
     ): RsData<Void> {
-        val actor = rq.actor
+        val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         val review = reviewService.findById(id) ?: throw NoSuchElementException()
         review.checkActorCanDelete(actor)
         reviewService.delete(review)
