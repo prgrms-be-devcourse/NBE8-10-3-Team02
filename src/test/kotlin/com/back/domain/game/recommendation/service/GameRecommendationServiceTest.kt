@@ -3,6 +3,7 @@ package com.back.domain.game.recommendation.service
 import com.back.domain.game.GameTestFixtures
 import com.back.domain.game.recommendation.repository.GameVectorRepository
 import com.back.domain.game.recommendation.repository.MemberVectorRepository
+import com.back.domain.member.member.entity.Member
 import com.back.domain.member.memberGame.entity.MemberGame
 import com.back.domain.member.memberGame.repository.MemberGameRepository
 import com.back.global.exception.ServiceException
@@ -74,8 +75,9 @@ class GameRecommendationServiceTest {
         fun `보유 게임 id들을 exclude 목록에 포함한다`() {
             val game1 = GameTestFixtures.gameWithId(10L, 100L, "G1", "")
             val game2 = GameTestFixtures.gameWithId(20L, 200L, "G2", "")
-            val mg1 = MemberGame(1L, 0.0, false, null, null, game1)
-            val mg2 = MemberGame(1L, 0.0, false, null, null, game2)
+            val member = Member(1, "test@test.com", "tester")
+            val mg1 = MemberGame(1L, 0.0, false, null, member, game1)
+            val mg2 = MemberGame(1L, 0.0, false, null, member, game2)
 
             whenever(memberVectorRepository.getProfileVectorString(MEMBER_ID)).thenReturn("[1.0]")
             whenever(memberGameRepository.findAllByMemberId(MEMBER_ID)).thenReturn(listOf(mg1, mg2))
