@@ -68,15 +68,7 @@ class ApiV1MemberGameController(
 
         val actor = memberService.findById(rq.actor.id) ?: throw NoSuchElementException()
         val game = gameService.findById(request.gameId).orElseThrow { ServiceException("404-1", "No Game") }
-        val memberGame =
-            memberGameService.addToLibrary(
-                request.platform,
-                request.playtime,
-                request.isFavorite,
-                request.status,
-                actor,
-                game,
-            )
+        val memberGame = memberGameService.addToLibrary(request, actor, game)
         memberService.flush()
         return RsData("201-1", "라이브러리에 게임 ${game.name}가 추가되었습니다.", MemberGameDto(memberGame))
     }

@@ -7,7 +7,13 @@ import com.back.domain.member.memberGame.StatusEnum
 import com.back.domain.review.entity.Review
 import com.back.global.exception.ServiceException
 import com.back.global.jpa.entity.BaseEntity
-import jakarta.persistence.*
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
 
 @Entity
 @Table(name = "member_game")

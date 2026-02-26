@@ -6,6 +6,7 @@ import com.back.domain.game.recommendation.event.ProfileVectorUpdateEvent
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.domain.member.memberGame.StatusEnum
+import com.back.domain.member.memberGame.dto.MemberGameAddRequest
 import com.back.domain.member.memberGame.dto.MemberGameUpdateRequest
 import com.back.domain.member.memberGame.entity.MemberGame
 import com.back.domain.member.memberGame.repository.MemberGameRepository
@@ -25,10 +26,7 @@ class MemberGameService(
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     fun addToLibrary(
-        platformGroupName: String,
-        playtime: Double,
-        isFavorite: Boolean,
-        status: StatusEnum?,
+        request: MemberGameAddRequest,
         member: Member,
         game: Game,
     ): MemberGame {
@@ -36,9 +34,9 @@ class MemberGameService(
             throw ServiceException("400-2", "이미 라이브러리에 존재하는 게임입니다.")
         }
         val platformId =
-            PlatformGroup.getDefaultPlatformId(platformGroupName)
-                ?: throw ServiceException("400-3", "유효하지 않은 플랫폼입니다: $platformGroupName")
-        val memberGame = member.addMemberGame(platformId, playtime, isFavorite, status, game)
+            PlatformGroup.getDefaultPlatformId(request.platform)
+                ?: throw ServiceException("400-3", "유효하지 않은 플랫폼입니다: ${request.platform}")
+        val memberGame = member.addMemberGame(platformId, request.playtime, request.isFavorite, request.status, game)
         eventPublisher.publishEvent(ProfileVectorUpdateEvent(member.id, "addToLibrary"))
         return memberGame
     }
