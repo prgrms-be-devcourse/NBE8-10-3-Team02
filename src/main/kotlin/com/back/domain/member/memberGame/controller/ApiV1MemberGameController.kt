@@ -51,7 +51,8 @@ class ApiV1MemberGameController(
         return RsData(
             "200-1",
             "라이브러리 조회",
-            memberGameService.findByMemberIdWithFilters(memberId, statusEnum, platform, pageable)
+            memberGameService
+                .findByMemberIdWithFilters(memberId, statusEnum, platform, pageable)
                 .map(::MemberGameDto),
         )
     }
@@ -67,9 +68,15 @@ class ApiV1MemberGameController(
 
         val actor = memberService.findById(rq.actor.id) ?: throw NoSuchElementException()
         val game = gameService.findById(request.gameId).orElseThrow { ServiceException("404-1", "No Game") }
-        val memberGame = memberGameService.addToLibrary(
-            request.platform, request.playtime, request.isFavorite, request.status, actor, game,
-        )
+        val memberGame =
+            memberGameService.addToLibrary(
+                request.platform,
+                request.playtime,
+                request.isFavorite,
+                request.status,
+                actor,
+                game,
+            )
         memberService.flush()
         return RsData("201-1", "라이브러리에 게임 ${game.name}가 추가되었습니다.", MemberGameDto(memberGame))
     }
