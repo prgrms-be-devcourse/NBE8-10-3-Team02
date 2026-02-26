@@ -28,6 +28,6 @@ data class MemberGameDto(
         gameName = memberGame.game.getName(),
         coverImageId = memberGame.game.getCoverImageId(),
         reviewId = memberGame.review?.id,
-        rating = memberGame.review?.getRating(),
+        rating = memberGame.review?.rating,
     )
 }
