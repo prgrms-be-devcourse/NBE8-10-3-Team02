@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository
 class GameSearchRepositoryImpl(
     private val queryFactory: JPAQueryFactory,
 ) : GameSearchRepositoryCustom {
-
     override fun searchByCondition(condition: GameSearchCondition): List<Game> {
         val builder = BooleanBuilder()
 
@@ -33,18 +32,20 @@ class GameSearchRepositoryImpl(
         return buildQuery(condition, builder).fetch()
     }
 
-    private fun buildQuery(condition: GameSearchCondition, builder: BooleanBuilder) =
-        queryFactory
-            .selectDistinct(game)
-            .from(game)
-            .leftJoin(gameGenre).on(gameGenre.game.eq(game))
-            .apply {
-                if (!condition.platformIgdbIds.isNullOrEmpty()) {
-                    join(gamePlatform).on(gamePlatform.game.eq(game))
-                    builder.and(gamePlatform.platform.igdbId.`in`(condition.platformIgdbIds))
-                } else {
-                    leftJoin(gamePlatform).on(gamePlatform.game.eq(game))
-                }
+    private fun buildQuery(
+        condition: GameSearchCondition,
+        builder: BooleanBuilder,
+    ) = queryFactory
+        .selectDistinct(game)
+        .from(game)
+        .leftJoin(gameGenre)
+        .on(gameGenre.game.eq(game))
+        .apply {
+            if (!condition.platformIgdbIds.isNullOrEmpty()) {
+                join(gamePlatform).on(gamePlatform.game.eq(game))
+                builder.and(gamePlatform.platform.igdbId.`in`(condition.platformIgdbIds))
+            } else {
+                leftJoin(gamePlatform).on(gamePlatform.game.eq(game))
             }
-            .where(builder)
+        }.where(builder)
 }
