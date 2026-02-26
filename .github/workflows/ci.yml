@@ -3,8 +3,6 @@ name: CI
 on:
   pull_request:
     branches: [ develop, main ]
-  push:
-    branches: [ 9-refactor-membergame-마이그레이션-시작만 ]
 
 permissions:
   contents: read
