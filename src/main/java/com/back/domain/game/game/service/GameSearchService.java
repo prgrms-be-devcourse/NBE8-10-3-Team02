@@ -3,10 +3,7 @@ package com.back.domain.game.game.service;
 import com.back.domain.game.game.dto.GameSearchCondition;
 
 import com.back.domain.game.game.dto.GameSearchResponse;
-import com.back.domain.game.game.entity.Game;
 import com.back.domain.game.game.entity.Genre;
-import com.back.domain.game.game.repository.GameRepository;
-import com.back.domain.game.game.repository.GameSearchRepository;
 import com.back.domain.game.game.repository.GenreRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.igdb.dto.IgdbGameSummaryDto;
