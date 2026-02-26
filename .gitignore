@@ -47,3 +47,4 @@ nul
 .claude/
 docs/
 *.md
+.kotlin/errors/
