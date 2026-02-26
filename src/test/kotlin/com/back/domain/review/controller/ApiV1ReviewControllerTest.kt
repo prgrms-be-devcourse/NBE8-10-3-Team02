@@ -32,10 +32,12 @@ import java.time.LocalDate
 @AutoConfigureMockMvc
 @Transactional
 class ApiV1ReviewControllerTest {
-
     @Autowired lateinit var mvc: MockMvc
+
     @Autowired lateinit var memberRepository: MemberRepository
+
     @Autowired lateinit var gameRepository: GameRepository
+
     @Autowired lateinit var reviewRepository: ReviewRepository
 
     @MockitoBean
@@ -54,12 +56,13 @@ class ApiV1ReviewControllerTest {
         password: String,
         nickname: String,
     ) {
-        mvc.perform(
-            post("/api/v1/auth/signup")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("email" to email, "password" to password, "nickname" to nickname))),
-        ).andExpect(status().isCreated)
+        mvc
+            .perform(
+                post("/api/v1/auth/signup")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsString(mapOf("email" to email, "password" to password, "nickname" to nickname))),
+            ).andExpect(status().isCreated)
     }
 
     private fun loginAndGetCookies(
@@ -67,12 +70,13 @@ class ApiV1ReviewControllerTest {
         password: String,
     ): Array<Cookie> {
         val result =
-            mvc.perform(
-                post("/api/v1/auth/login")
-                    .with(csrf())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsString(mapOf("email" to email, "password" to password))),
-            ).andExpect(status().isOk)
+            mvc
+                .perform(
+                    post("/api/v1/auth/login")
+                        .with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(mapOf("email" to email, "password" to password))),
+                ).andExpect(status().isOk)
                 .andReturn()
         return result.response.cookies
     }
@@ -94,23 +98,24 @@ class ApiV1ReviewControllerTest {
         memberId: Int,
         gameId: Int,
     ) {
-        mvc.perform(
-            post("/api/v1/members/{memberId}/library", memberId)
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf(
-                            "platform" to "PC",
-                            "playtime" to 0.0,
-                            "isFavorite" to false,
-                            "status" to "PLAYING",
-                            "gameId" to gameId,
+        mvc
+            .perform(
+                post("/api/v1/members/{memberId}/library", memberId)
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf(
+                                "platform" to "PC",
+                                "playtime" to 0.0,
+                                "isFavorite" to false,
+                                "status" to "PLAYING",
+                                "gameId" to gameId,
+                            ),
                         ),
                     ),
-                ),
-        ).andExpect(status().isCreated)
+            ).andExpect(status().isCreated)
     }
 
     private fun writeReview(
@@ -120,24 +125,26 @@ class ApiV1ReviewControllerTest {
         content: String,
         rating: Double,
     ): MvcResult =
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf("title" to title, "content" to content, "rating" to rating, "gameId" to gameId),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf("title" to title, "content" to content, "rating" to rating, "gameId" to gameId),
+                        ),
                     ),
-                ),
-        ).andReturn()
+            ).andReturn()
 
     // --- tests ---
 
     @Test
     @DisplayName("리뷰 목록 조회: 200-1 반환")
     fun getReviews_success() {
-        mvc.perform(get("/api/v1/reviews"))
+        mvc
+            .perform(get("/api/v1/reviews"))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.content").isArray)
@@ -152,7 +159,8 @@ class ApiV1ReviewControllerTest {
         val cookies = loginAndGetCookies(email, "1234")
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
-        mvc.perform(get("/api/v1/reviews/member/{memberId}", memberId).cookie(*cookies))
+        mvc
+            .perform(get("/api/v1/reviews/member/{memberId}", memberId).cookie(*cookies))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.content").isArray)
@@ -163,7 +171,8 @@ class ApiV1ReviewControllerTest {
     fun getReviewsByGame_success() {
         val game = createTestGame()
 
-        mvc.perform(get("/api/v1/reviews/game/{gameId}", game.getId()))
+        mvc
+            .perform(get("/api/v1/reviews/game/{gameId}", game.getId()))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.content").isArray)
@@ -182,9 +191,15 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(cookies, memberId, game.getId())
 
         val writeResult = writeReview(cookies, game.getId(), "Test Title", "Test Content", 4.5)
-        val reviewId = om.readTree(writeResult.response.contentAsString).get("data").get("id").asInt()
+        val reviewId =
+            om
+                .readTree(writeResult.response.contentAsString)
+                .get("data")
+                .get("id")
+                .asInt()
 
-        mvc.perform(get("/api/v1/reviews/{id}", reviewId).cookie(*cookies))
+        mvc
+            .perform(get("/api/v1/reviews/{id}", reviewId).cookie(*cookies))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.title").value("Test Title"))
             .andExpect(jsonPath("$.content").value("Test Content"))
@@ -198,7 +213,8 @@ class ApiV1ReviewControllerTest {
         signup(email, "1234", uniqueNickname("reviewer"))
         val cookies = loginAndGetCookies(email, "1234")
 
-        mvc.perform(get("/api/v1/reviews/{id}", 999999).cookie(*cookies))
+        mvc
+            .perform(get("/api/v1/reviews/{id}", 999999).cookie(*cookies))
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.resultCode").value("404-1"))
     }
@@ -215,22 +231,23 @@ class ApiV1ReviewControllerTest {
         val game = createTestGame()
         addGameToLibrary(cookies, memberId, game.getId())
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf(
-                            "title" to "Great Game",
-                            "content" to "Really enjoyed it",
-                            "rating" to 4.5,
-                            "gameId" to game.getId(),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf(
+                                "title" to "Great Game",
+                                "content" to "Really enjoyed it",
+                                "rating" to 4.5,
+                                "gameId" to game.getId(),
+                            ),
                         ),
                     ),
-                ),
-        ).andExpect(status().isCreated)
+            ).andExpect(status().isCreated)
             .andExpect(jsonPath("$.resultCode").value("201"))
             .andExpect(jsonPath("$.data.title").value("Great Game"))
             .andExpect(jsonPath("$.data.content").value("Really enjoyed it"))
@@ -243,16 +260,17 @@ class ApiV1ReviewControllerTest {
     fun writeReview_unauthorized() {
         val game = createTestGame()
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+                        ),
                     ),
-                ),
-        ).andExpect(status().isUnauthorized)
+            ).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -265,17 +283,18 @@ class ApiV1ReviewControllerTest {
 
         val game = createTestGame()
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+                        ),
                     ),
-                ),
-        ).andExpect(status().isForbidden)
+            ).andExpect(status().isForbidden)
             .andExpect(jsonPath("$.resultCode").value("403-3"))
     }
 
@@ -292,22 +311,23 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(cookies, memberId, game.getId())
         writeReview(cookies, game.getId(), "First Review", "Content", 4.0)
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf(
-                            "title" to "Second Review",
-                            "content" to "Content again",
-                            "rating" to 3.0,
-                            "gameId" to game.getId(),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf(
+                                "title" to "Second Review",
+                                "content" to "Content again",
+                                "rating" to 3.0,
+                                "gameId" to game.getId(),
+                            ),
                         ),
                     ),
-                ),
-        ).andExpect(status().isBadRequest)
+            ).andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.resultCode").value("400-1"))
     }
 
@@ -319,17 +339,18 @@ class ApiV1ReviewControllerTest {
         signup(email, "1234", nickname)
         val cookies = loginAndGetCookies(email, "1234")
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to 999999),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to 999999),
+                        ),
                     ),
-                ),
-        ).andExpect(status().isNotFound)
+            ).andExpect(status().isNotFound)
             .andExpect(jsonPath("$.resultCode").value("404-1"))
     }
 
@@ -341,17 +362,18 @@ class ApiV1ReviewControllerTest {
         signup(email, "1234", nickname)
         val cookies = loginAndGetCookies(email, "1234")
 
-        mvc.perform(
-            post("/api/v1/reviews")
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(
-                        mapOf("title" to "", "content" to "Content", "rating" to 4.0, "gameId" to 1),
+        mvc
+            .perform(
+                post("/api/v1/reviews")
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(
+                            mapOf("title" to "", "content" to "Content", "rating" to 4.0, "gameId" to 1),
+                        ),
                     ),
-                ),
-        ).andExpect(status().isBadRequest)
+            ).andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.resultCode").value("400-1"))
     }
 
@@ -368,7 +390,8 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(cookies, memberId, game.getId())
         writeReview(cookies, game.getId(), "My Review", "My content", 4.0)
 
-        mvc.perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
+        mvc
+            .perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.title").value("My Review"))
@@ -385,7 +408,8 @@ class ApiV1ReviewControllerTest {
 
         val game = createTestGame()
 
-        mvc.perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
+        mvc
+            .perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.resultCode").value("404-2"))
     }
@@ -393,7 +417,8 @@ class ApiV1ReviewControllerTest {
     @Test
     @DisplayName("내 리뷰 조회(게임별): 비로그인 → 401")
     fun getMyGameReview_unauthorized() {
-        mvc.perform(get("/api/v1/reviews/my/game/{gameId}", 1))
+        mvc
+            .perform(get("/api/v1/reviews/my/game/{gameId}", 1))
             .andExpect(status().isUnauthorized)
     }
 
@@ -413,15 +438,16 @@ class ApiV1ReviewControllerTest {
         val author = requireNotNull(memberRepository.findByEmail(email))
         val reviewId = reviewRepository.findByAuthorAndGame(author, game)!!.id
 
-        mvc.perform(
-            put("/api/v1/reviews/{id}", reviewId)
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(mapOf("title" to "Modified Title", "content" to "Modified Content", "rating" to 5.0)),
-                ),
-        ).andExpect(status().isCreated)
+        mvc
+            .perform(
+                put("/api/v1/reviews/{id}", reviewId)
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(mapOf("title" to "Modified Title", "content" to "Modified Content", "rating" to 5.0)),
+                    ),
+            ).andExpect(status().isCreated)
             .andExpect(jsonPath("$.resultCode").value("201"))
             .andExpect(jsonPath("$.data.title").value("Modified Title"))
             .andExpect(jsonPath("$.data.content").value("Modified Content"))
@@ -431,12 +457,13 @@ class ApiV1ReviewControllerTest {
     @Test
     @DisplayName("리뷰 수정: 비로그인 → 401")
     fun modifyReview_unauthorized() {
-        mvc.perform(
-            put("/api/v1/reviews/{id}", 1)
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("title" to "Title", "content" to "Content", "rating" to 4.0))),
-        ).andExpect(status().isUnauthorized)
+        mvc
+            .perform(
+                put("/api/v1/reviews/{id}", 1)
+                    .with(csrf())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsString(mapOf("title" to "Title", "content" to "Content", "rating" to 4.0))),
+            ).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -447,13 +474,14 @@ class ApiV1ReviewControllerTest {
         signup(email, "1234", nickname)
         val cookies = loginAndGetCookies(email, "1234")
 
-        mvc.perform(
-            put("/api/v1/reviews/{id}", 1)
-                .with(csrf())
-                .cookie(*cookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(mapOf("title" to "", "content" to "", "rating" to 4.0))),
-        ).andExpect(status().isBadRequest)
+        mvc
+            .perform(
+                put("/api/v1/reviews/{id}", 1)
+                    .with(csrf())
+                    .cookie(*cookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(om.writeValueAsString(mapOf("title" to "", "content" to "", "rating" to 4.0))),
+            ).andExpect(status().isBadRequest)
             .andExpect(jsonPath("$.resultCode").value("400-1"))
     }
 
@@ -475,17 +503,23 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(writerCookies, writerId, game.getId())
 
         val writeResult = writeReview(writerCookies, game.getId(), "Writer's Review", "Content", 4.0)
-        val reviewId = om.readTree(writeResult.response.contentAsString).get("data").get("id").asInt()
+        val reviewId =
+            om
+                .readTree(writeResult.response.contentAsString)
+                .get("data")
+                .get("id")
+                .asInt()
 
-        mvc.perform(
-            put("/api/v1/reviews/{id}", reviewId)
-                .with(csrf())
-                .cookie(*otherCookies)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    om.writeValueAsString(mapOf("title" to "Hacked Title", "content" to "Hacked Content", "rating" to 1.0)),
-                ),
-        ).andExpect(status().isForbidden)
+        mvc
+            .perform(
+                put("/api/v1/reviews/{id}", reviewId)
+                    .with(csrf())
+                    .cookie(*otherCookies)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        om.writeValueAsString(mapOf("title" to "Hacked Title", "content" to "Hacked Content", "rating" to 1.0)),
+                    ),
+            ).andExpect(status().isForbidden)
             .andExpect(jsonPath("$.resultCode").value("403-1"))
     }
 
@@ -502,23 +536,30 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(cookies, memberId, game.getId())
 
         val writeResult = writeReview(cookies, game.getId(), "To Delete", "Content", 4.0)
-        val reviewId = om.readTree(writeResult.response.contentAsString).get("data").get("id").asInt()
+        val reviewId =
+            om
+                .readTree(writeResult.response.contentAsString)
+                .get("data")
+                .get("id")
+                .asInt()
 
-        mvc.perform(
-            delete("/api/v1/reviews/{id}", reviewId)
-                .with(csrf())
-                .cookie(*cookies),
-        ).andExpect(status().isOk)
+        mvc
+            .perform(
+                delete("/api/v1/reviews/{id}", reviewId)
+                    .with(csrf())
+                    .cookie(*cookies),
+            ).andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200"))
     }
 
     @Test
     @DisplayName("리뷰 삭제: 비로그인 → 401")
     fun deleteReview_unauthorized() {
-        mvc.perform(
-            delete("/api/v1/reviews/{id}", 1)
-                .with(csrf()),
-        ).andExpect(status().isUnauthorized)
+        mvc
+            .perform(
+                delete("/api/v1/reviews/{id}", 1)
+                    .with(csrf()),
+            ).andExpect(status().isUnauthorized)
     }
 
     @Test
@@ -539,13 +580,19 @@ class ApiV1ReviewControllerTest {
         addGameToLibrary(writerCookies, writerId, game.getId())
 
         val writeResult = writeReview(writerCookies, game.getId(), "Writer's Review", "Content", 4.0)
-        val reviewId = om.readTree(writeResult.response.contentAsString).get("data").get("id").asInt()
+        val reviewId =
+            om
+                .readTree(writeResult.response.contentAsString)
+                .get("data")
+                .get("id")
+                .asInt()
 
-        mvc.perform(
-            delete("/api/v1/reviews/{id}", reviewId)
-                .with(csrf())
-                .cookie(*otherCookies),
-        ).andExpect(status().isForbidden)
+        mvc
+            .perform(
+                delete("/api/v1/reviews/{id}", reviewId)
+                    .with(csrf())
+                    .cookie(*otherCookies),
+            ).andExpect(status().isForbidden)
             .andExpect(jsonPath("$.resultCode").value("403-2"))
     }
 }

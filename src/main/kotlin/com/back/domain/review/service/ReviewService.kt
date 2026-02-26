@@ -79,7 +79,8 @@ class ReviewService(
         val author = requireNotNull(review.author)
         val authorId = author.id
         gameRepository.decrementReviewCount(review.game.getId())
-        memberGameRepository.findByMemberIdAndGameId(author.id, review.game.getId())
+        memberGameRepository
+            .findByMemberIdAndGameId(author.id, review.game.getId())
             ?.review = null
         reviewRepository.delete(review)
         eventPublisher.publishEvent(ProfileVectorUpdateEvent(authorId, "deleteReview"))
