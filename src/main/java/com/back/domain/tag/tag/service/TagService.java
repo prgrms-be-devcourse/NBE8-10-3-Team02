@@ -62,7 +62,7 @@ public class TagService {
         }
 
         List<Tag> tags = new ArrayList<>();
-        tags.add(getOrCreate(game.name()));
+        tags.add(getOrCreate(game.getName()));
 
 
         return tags;

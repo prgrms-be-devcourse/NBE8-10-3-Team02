@@ -9,7 +9,7 @@ public record MemberGameDto(
         double playtime,
         boolean isFavorite,
         StatusEnum status,
-        int gameId,
+        Long gameId,
         Long igdbId,
         String gameName,
         String coverImageId,

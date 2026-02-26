@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MemberGameRepository extends JpaRepository<MemberGame, Integer> {
-    Optional<MemberGame> findByMemberIdAndGameId(int memberId, int gameId);
+    Optional<MemberGame> findByMemberIdAndGameId(int memberId, Long gameId);
 
     Page<MemberGame> findByMemberId(int memberId, Pageable pageable);
 

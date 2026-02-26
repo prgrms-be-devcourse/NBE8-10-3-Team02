@@ -1,0 +1,27 @@
+package com.back.domain.game.game.entity
+
+import jakarta.persistence.*
+
+@Entity
+@Table(
+    name = "player_perspective",
+    uniqueConstraints = [UniqueConstraint(name = "uk_player_perspective_igdb_id", columnNames = ["igdb_id"])],
+)
+class PlayerPerspective(
+    @Column(name = "igdb_id", nullable = false)
+    var igdbId: Long,
+    @Column(nullable = false)
+    var name: String,
+) {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null
+        protected set
+
+    companion object {
+        fun createPlayerPerspective(
+            igdbId: Long,
+            name: String,
+        ) = PlayerPerspective(igdbId, name)
+    }
+}

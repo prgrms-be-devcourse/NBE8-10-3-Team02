@@ -1,7 +1,5 @@
 package com.back.domain.review.dto;
 
-import com.back.domain.game.game.entity.Game;
-import com.back.domain.post.post.entity.Post;
 import com.back.domain.review.entity.Review;
 
 import java.time.LocalDateTime;
@@ -14,7 +12,7 @@ public record ReviewDto(
         LocalDateTime modifyDate,
         int authorId,
         String authorNickName,
-        int gameId,
+        Long gameId,
         String gameName,
         String content,
         double rating

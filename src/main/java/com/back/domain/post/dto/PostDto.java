@@ -1,8 +1,6 @@
 package com.back.domain.post.dto;
 
 import com.back.domain.post.post.entity.Post;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 import java.util.List;

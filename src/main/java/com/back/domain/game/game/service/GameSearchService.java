@@ -3,10 +3,7 @@ package com.back.domain.game.game.service;
 import com.back.domain.game.game.dto.GameSearchCondition;
 
 import com.back.domain.game.game.dto.GameSearchResponse;
-import com.back.domain.game.game.entity.Game;
 import com.back.domain.game.game.entity.Genre;
-import com.back.domain.game.game.repository.GameRepository;
-import com.back.domain.game.game.repository.GameSearchRepository;
 import com.back.domain.game.game.repository.GenreRepository;
 import com.back.global.exception.ServiceException;
 import com.back.global.igdb.dto.IgdbGameSummaryDto;
@@ -79,8 +76,8 @@ public class GameSearchService {
 
         // 2. 장르 매핑
         Set<Long> genreIgdbIds = igdbGames.stream()
-                .filter(g -> g.genres() != null)
-                .flatMap(g -> g.genres().stream())
+                .filter(g -> g.getGenres() != null)
+                .flatMap(g -> g.getGenres().stream())
                 .collect(Collectors.toSet());
 
         Map<Long, String> genreMap =
@@ -93,8 +90,8 @@ public class GameSearchService {
 
 //        플랫폼 수집
         Set<Long> platformIds = igdbGames.stream()
-                .filter(g -> g.platforms() != null)
-                .flatMap(g -> g.platforms().stream())
+                .filter(g -> g.getPlatforms() != null)
+                .flatMap(g -> g.getPlatforms().stream())
                 .collect(Collectors.toSet());
 
         Map<Long, String> platformMap =

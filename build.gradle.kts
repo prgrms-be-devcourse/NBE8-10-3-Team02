@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "2.1.0"
     kotlin("plugin.jpa") version "2.1.0"
+    kotlin("plugin.lombok") version "2.1.0"
     kotlin("kapt") version "2.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("io.gitlab.arturbosch.detekt") version "1.23.7"
@@ -99,6 +100,8 @@ dependencies {
 
     // Detekt에서 쓰는 Ktlint Wrapper
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
+
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 tasks.withType<Test> {
@@ -118,6 +121,7 @@ tasks.jacocoTestReport {
 }
 
 ktlint {
+    disabledRules.set(setOf("no-wildcard-imports"))
     version.set("1.4.0")
     reporters {
         reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
