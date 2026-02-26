@@ -61,7 +61,15 @@ class ApiV1ReviewControllerTest {
                 post("/api/v1/auth/signup")
                     .with(csrf())
                     .contentType(MediaType.APPLICATION_JSON)
-                    .content(om.writeValueAsString(mapOf("email" to email, "password" to password, "nickname" to nickname))),
+                    .content(
+                        om.writeValueAsString(
+                            mapOf(
+                                "email" to email,
+                                "password" to password,
+                                "nickname" to nickname,
+                            ),
+                        ),
+                    ),
             ).andExpect(status().isCreated)
     }
 
@@ -267,7 +275,12 @@ class ApiV1ReviewControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         om.writeValueAsString(
-                            mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+                            mapOf(
+                                "title" to "Title",
+                                "content" to "Content",
+                                "rating" to 4.0,
+                                "gameId" to game.getId(),
+                            ),
                         ),
                     ),
             ).andExpect(status().isUnauthorized)
@@ -291,7 +304,12 @@ class ApiV1ReviewControllerTest {
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
                         om.writeValueAsString(
-                            mapOf("title" to "Title", "content" to "Content", "rating" to 4.0, "gameId" to game.getId()),
+                            mapOf(
+                                "title" to "Title",
+                                "content" to "Content",
+                                "rating" to 4.0,
+                                "gameId" to game.getId(),
+                            ),
                         ),
                     ),
             ).andExpect(status().isForbidden)
@@ -445,7 +463,13 @@ class ApiV1ReviewControllerTest {
                     .cookie(*cookies)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        om.writeValueAsString(mapOf("title" to "Modified Title", "content" to "Modified Content", "rating" to 5.0)),
+                        om.writeValueAsString(
+                            mapOf(
+                                "title" to "Modified Title",
+                                "content" to "Modified Content",
+                                "rating" to 5.0,
+                            ),
+                        ),
                     ),
             ).andExpect(status().isCreated)
             .andExpect(jsonPath("$.resultCode").value("201"))
@@ -517,7 +541,13 @@ class ApiV1ReviewControllerTest {
                     .cookie(*otherCookies)
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(
-                        om.writeValueAsString(mapOf("title" to "Hacked Title", "content" to "Hacked Content", "rating" to 1.0)),
+                        om.writeValueAsString(
+                            mapOf(
+                                "title" to "Hacked Title",
+                                "content" to "Hacked Content",
+                                "rating" to 1.0,
+                            ),
+                        ),
                     ),
             ).andExpect(status().isForbidden)
             .andExpect(jsonPath("$.resultCode").value("403-1"))
