@@ -1,9 +1,21 @@
 package com.back.global.batch
 
-import com.back.domain.game.game.entity.*
-import com.back.domain.game.game.repository.*
+import com.back.domain.game.game.entity.Company
+import com.back.domain.game.game.entity.CompanyRole
+import com.back.domain.game.game.entity.Genre
+import com.back.domain.game.game.entity.Platform
+import com.back.domain.game.game.repository.CompanyRepository
+import com.back.domain.game.game.repository.GameModeRepository
+import com.back.domain.game.game.repository.GenreRepository
+import com.back.domain.game.game.repository.KeywordRepository
+import com.back.domain.game.game.repository.PlatformRepository
+import com.back.domain.game.game.repository.PlayerPerspectiveRepository
+import com.back.domain.game.game.repository.ThemeRepository
 import com.back.global.batch.processor.IgdbGameProcessor
-import com.back.global.igdb.dto.*
+import com.back.global.igdb.dto.IgdbCompanyDto
+import com.back.global.igdb.dto.IgdbGameDetailDto
+import com.back.global.igdb.dto.IgdbGenreDto
+import com.back.global.igdb.dto.IgdbInvolvedCompanyDto
 import com.back.support.IgdbFixtures
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach

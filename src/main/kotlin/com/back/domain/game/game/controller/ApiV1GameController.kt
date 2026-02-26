@@ -47,7 +47,10 @@ class ApiV1GameController(
     ): List<SimilarGameResponse> = gameService.getSimilarGames(igdbId)
 
     @GetMapping("/games/popular/igdb")
-    @Operation(summary = "IGDB 인기 게임 조회", description = "IGDB Popular Right Now (Visits + Want + Twitch 가중치 조합)")
+    @Operation(
+        summary = "IGDB 인기 게임 조회",
+        description = "IGDB Popular Right Now (Visits + Want + Twitch 가중치 조합)",
+    )
     fun getIgdbPopularGames(
         @RequestParam(defaultValue = "10") limit: Int,
     ): List<PopularGameCardDto> = gameService.getIgdbPopularGames(limit)

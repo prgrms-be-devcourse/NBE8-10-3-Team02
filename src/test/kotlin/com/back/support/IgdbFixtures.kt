@@ -1,6 +1,11 @@
 package com.back.support
 
-import com.back.global.igdb.dto.*
+import com.back.global.igdb.dto.IgdbCompanyDto
+import com.back.global.igdb.dto.IgdbCoverDto
+import com.back.global.igdb.dto.IgdbGameDetailDto
+import com.back.global.igdb.dto.IgdbGenreDto
+import com.back.global.igdb.dto.IgdbInvolvedCompanyDto
+import com.back.global.igdb.dto.IgdbPlatformDto
 
 object IgdbFixtures {
     fun gameDetail(igdbId: Long) =
@@ -12,7 +17,12 @@ object IgdbFixtures {
             cover = IgdbCoverDto(10000L, "coverImage"),
             involvedCompanies =
                 listOf(
-                    IgdbInvolvedCompanyDto(10000L, IgdbCompanyDto(10000L, "testCompany"), developer = true, publisher = true),
+                    IgdbInvolvedCompanyDto(
+                        10000L,
+                        IgdbCompanyDto(10000L, "testCompany"),
+                        developer = true,
+                        publisher = true,
+                    ),
                 ),
             genres =
                 listOf(

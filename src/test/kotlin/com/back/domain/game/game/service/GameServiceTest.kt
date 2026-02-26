@@ -2,8 +2,21 @@ package com.back.domain.game.game.service
 
 import com.back.domain.game.game.dto.GameDetailResponse
 import com.back.domain.game.game.dto.SimilarGameResponse
-import com.back.domain.game.game.entity.*
-import com.back.domain.game.game.repository.*
+import com.back.domain.game.game.entity.Company
+import com.back.domain.game.game.entity.CompanyRole
+import com.back.domain.game.game.entity.Game
+import com.back.domain.game.game.entity.GameCompany
+import com.back.domain.game.game.entity.GameGenre
+import com.back.domain.game.game.entity.GamePlatform
+import com.back.domain.game.game.entity.Genre
+import com.back.domain.game.game.entity.Platform
+import com.back.domain.game.game.repository.CompanyRepository
+import com.back.domain.game.game.repository.GameCompanyRepository
+import com.back.domain.game.game.repository.GameGenreRepository
+import com.back.domain.game.game.repository.GamePlatformRepository
+import com.back.domain.game.game.repository.GameRepository
+import com.back.domain.game.game.repository.GenreRepository
+import com.back.domain.game.game.repository.PlatformRepository
 import com.back.domain.game.recommendation.dto.GameRecommendationResponse
 import com.back.domain.game.recommendation.service.GameRecommendationService
 import com.back.global.exception.ServiceException

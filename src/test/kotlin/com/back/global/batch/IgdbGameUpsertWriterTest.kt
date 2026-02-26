@@ -1,8 +1,18 @@
 package com.back.global.batch
 
 import com.back.domain.game.GameTestFixtures
-import com.back.domain.game.game.entity.*
-import com.back.domain.game.game.repository.*
+import com.back.domain.game.game.entity.Game
+import com.back.domain.game.game.entity.GameGenre
+import com.back.domain.game.game.entity.Genre
+import com.back.domain.game.game.repository.GameCompanyRepository
+import com.back.domain.game.game.repository.GameExternalIdRepository
+import com.back.domain.game.game.repository.GameGameModeRepository
+import com.back.domain.game.game.repository.GameGenreRepository
+import com.back.domain.game.game.repository.GameKeywordRepository
+import com.back.domain.game.game.repository.GamePlatformRepository
+import com.back.domain.game.game.repository.GamePlayerPerspectiveRepository
+import com.back.domain.game.game.repository.GameRepository
+import com.back.domain.game.game.repository.GameThemeRepository
 import com.back.domain.game.recommendation.repository.GameVectorRepository
 import com.back.domain.game.recommendation.service.GameVectorService
 import com.back.global.batch.dto.GameBatchItem
