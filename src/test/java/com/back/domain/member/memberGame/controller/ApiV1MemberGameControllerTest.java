@@ -87,7 +87,7 @@ class ApiV1MemberGameControllerTest {
     }
 
     /** 라이브러리에 게임을 추가하고 MvcResult 반환 (memberGameId 파싱용) */
-    private MvcResult addGameToLibrary(Cookie[] cookies, int memberId, int gameId) throws Exception {
+    private MvcResult addGameToLibrary(Cookie[] cookies, int memberId, long gameId) throws Exception {
         return mvc.perform(post("/api/v1/members/{memberId}/library", memberId)
                         .with(csrf())
                         .cookie(cookies)
@@ -301,7 +301,7 @@ class ApiV1MemberGameControllerTest {
         int memberId = memberRepository.findByEmail(email).getId();
 
         Game game = createTestGame();
-        addGameToLibrary(cookies, memberId, game.getId());
+        addGameToLibrary(cookies, memberId, game.getId  ());
 
         mvc.perform(post("/api/v1/members/{memberId}/library", memberId)
                         .with(csrf())

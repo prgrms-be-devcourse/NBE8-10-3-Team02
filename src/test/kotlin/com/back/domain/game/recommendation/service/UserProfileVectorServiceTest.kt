@@ -398,7 +398,7 @@ class UserProfileVectorServiceTest {
     ): MemberGame {
         val mg = MemberGame(1L, playtime, favorite, status, Member(1, "test@test.com", "tester"), game)
         if (review != null) {
-            mg.setReview(review)
+            mg.review = review
         }
         return mg
     }

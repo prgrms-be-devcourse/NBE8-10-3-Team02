@@ -88,7 +88,7 @@ class ApiV1ReviewController(
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         val game = gameService.findById(reqBody.gameId).orElseThrow { ServiceException("404-1", "No Game") }
         val review = reviewService.write(reqBody.title, reqBody.content, reqBody.rating, actor, game)
-        memberGameService.updateReview(actor.id, game.getId(), review)
+        memberGameService.updateReview(actor.id, requireNotNull(game.id), review)
         return RsData("201", "리뷰가 작성되었습니다.", ReviewDto(review))
     }
 
@@ -96,7 +96,7 @@ class ApiV1ReviewController(
     @Transactional(readOnly = true)
     @Operation(summary = "내 리뷰 조회 (게임별)")
     fun getMyGameReview(
-        @PathVariable gameId: Int,
+        @PathVariable gameId: Long,
     ): RsData<ReviewDto> {
         val actor = rq.actor ?: throw ServiceException("401-1", "로그인이 필요합니다.")
         val game =

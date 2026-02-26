@@ -34,7 +34,7 @@ class ReviewService(
         member: Member,
         game: Game,
     ): Review {
-        memberGameRepository.findByMemberIdAndGameId(member.id, game.getId())
+        memberGameRepository.findByMemberIdAndGameId(member.id, requireNotNull(game.id))
             ?: throw ServiceException("403-3", "라이브러리에 없는 게임은 리뷰를 작성할 수 없습니다.")
 
         if (reviewRepository.findByAuthorAndGame(member, game) != null) {
@@ -42,7 +42,7 @@ class ReviewService(
         }
 
         val review = reviewRepository.save(Review(title, content, rating, member, game))
-        gameRepository.incrementReviewCount(game.getId())
+        gameRepository.incrementReviewCount(requireNotNull(game.id))
         eventPublisher.publishEvent(ProfileVectorUpdateEvent(member.id, "writeReview"))
         return review
     }
@@ -78,9 +78,9 @@ class ReviewService(
     fun delete(review: Review) {
         val author = requireNotNull(review.author)
         val authorId = author.id
-        gameRepository.decrementReviewCount(review.game.getId())
+        gameRepository.decrementReviewCount(requireNotNull(review.game.id))
         memberGameRepository
-            .findByMemberIdAndGameId(author.id, review.game.getId())
+            .findByMemberIdAndGameId(author.id, requireNotNull(review.game.id))
             ?.review = null
         reviewRepository.delete(review)
         eventPublisher.publishEvent(ProfileVectorUpdateEvent(authorId, "deleteReview"))

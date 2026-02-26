@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface MemberGameRepository : JpaRepository<MemberGame, Int> {
     fun findByMemberIdAndGameId(
         memberId: Int,
-        gameId: Int,
+        gameId: Long,
     ): MemberGame?
 
     fun findByMemberId(

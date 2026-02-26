@@ -30,7 +30,7 @@ class MemberGameService(
         member: Member,
         game: Game,
     ): MemberGame {
-        if (memberGameRepository.findByMemberIdAndGameId(member.id, game.getId()) != null) {
+        if (memberGameRepository.findByMemberIdAndGameId(member.id, requireNotNull(game.id)) != null) {
             throw ServiceException("400-2", "이미 라이브러리에 존재하는 게임입니다.")
         }
         val platformId =
@@ -54,7 +54,7 @@ class MemberGameService(
 
     fun findByMemberAndGame(
         memberId: Int,
-        gameId: Int,
+        gameId: Long,
     ): MemberGame =
         memberGameRepository.findByMemberIdAndGameId(memberId, gameId)
             ?: throw ServiceException("404", "MemberGame not found")
@@ -107,7 +107,7 @@ class MemberGameService(
     @Transactional
     fun updateReview(
         memberId: Int,
-        gameId: Int,
+        gameId: Long,
         review: Review,
     ): MemberGame {
         val memberGame =

@@ -104,7 +104,7 @@ class ApiV1ReviewControllerTest {
     private fun addGameToLibrary(
         cookies: Array<Cookie>,
         memberId: Int,
-        gameId: Int,
+        gameId: Long,
     ) {
         mvc
             .perform(
@@ -128,7 +128,7 @@ class ApiV1ReviewControllerTest {
 
     private fun writeReview(
         cookies: Array<Cookie>,
-        gameId: Int,
+        gameId: Long,
         title: String,
         content: String,
         rating: Double,
@@ -180,7 +180,7 @@ class ApiV1ReviewControllerTest {
         val game = createTestGame()
 
         mvc
-            .perform(get("/api/v1/reviews/game/{gameId}", game.getId()))
+            .perform(get("/api/v1/reviews/game/{gameId}", requireNotNull(game.id)))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.content").isArray)
@@ -196,9 +196,9 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
 
-        val writeResult = writeReview(cookies, game.getId(), "Test Title", "Test Content", 4.5)
+        val writeResult = writeReview(cookies, requireNotNull(game.id), "Test Title", "Test Content", 4.5)
         val reviewId =
             om
                 .readTree(writeResult.response.contentAsString)
@@ -237,7 +237,7 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
 
         mvc
             .perform(
@@ -251,7 +251,7 @@ class ApiV1ReviewControllerTest {
                                 "title" to "Great Game",
                                 "content" to "Really enjoyed it",
                                 "rating" to 4.5,
-                                "gameId" to game.getId(),
+                                "gameId" to requireNotNull(game.id),
                             ),
                         ),
                     ),
@@ -260,7 +260,7 @@ class ApiV1ReviewControllerTest {
             .andExpect(jsonPath("$.data.title").value("Great Game"))
             .andExpect(jsonPath("$.data.content").value("Really enjoyed it"))
             .andExpect(jsonPath("$.data.rating").value(4.5))
-            .andExpect(jsonPath("$.data.gameId").value(game.getId()))
+            .andExpect(jsonPath("$.data.gameId").value(requireNotNull(game.id)))
     }
 
     @Test
@@ -279,7 +279,7 @@ class ApiV1ReviewControllerTest {
                                 "title" to "Title",
                                 "content" to "Content",
                                 "rating" to 4.0,
-                                "gameId" to game.getId(),
+                                "gameId" to requireNotNull(game.id),
                             ),
                         ),
                     ),
@@ -308,7 +308,7 @@ class ApiV1ReviewControllerTest {
                                 "title" to "Title",
                                 "content" to "Content",
                                 "rating" to 4.0,
-                                "gameId" to game.getId(),
+                                "gameId" to requireNotNull(game.id),
                             ),
                         ),
                     ),
@@ -326,8 +326,8 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
-        writeReview(cookies, game.getId(), "First Review", "Content", 4.0)
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
+        writeReview(cookies, requireNotNull(game.id), "First Review", "Content", 4.0)
 
         mvc
             .perform(
@@ -341,7 +341,7 @@ class ApiV1ReviewControllerTest {
                                 "title" to "Second Review",
                                 "content" to "Content again",
                                 "rating" to 3.0,
-                                "gameId" to game.getId(),
+                                "gameId" to requireNotNull(game.id),
                             ),
                         ),
                     ),
@@ -405,11 +405,11 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
-        writeReview(cookies, game.getId(), "My Review", "My content", 4.0)
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
+        writeReview(cookies, requireNotNull(game.id), "My Review", "My content", 4.0)
 
         mvc
-            .perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
+            .perform(get("/api/v1/reviews/my/game/{gameId}", requireNotNull(game.id)).cookie(*cookies))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.resultCode").value("200-1"))
             .andExpect(jsonPath("$.data.title").value("My Review"))
@@ -427,7 +427,7 @@ class ApiV1ReviewControllerTest {
         val game = createTestGame()
 
         mvc
-            .perform(get("/api/v1/reviews/my/game/{gameId}", game.getId()).cookie(*cookies))
+            .perform(get("/api/v1/reviews/my/game/{gameId}", requireNotNull(game.id)).cookie(*cookies))
             .andExpect(status().isNotFound)
             .andExpect(jsonPath("$.resultCode").value("404-2"))
     }
@@ -450,9 +450,9 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
 
-        writeReview(cookies, game.getId(), "Original Title", "Original Content", 3.0)
+        writeReview(cookies, requireNotNull(game.id), "Original Title", "Original Content", 3.0)
         val author = requireNotNull(memberRepository.findByEmail(email))
         val reviewId = reviewRepository.findByAuthorAndGame(author, game)!!.id
 
@@ -524,9 +524,9 @@ class ApiV1ReviewControllerTest {
         val otherCookies = loginAndGetCookies(otherEmail, "1234")
 
         val game = createTestGame()
-        addGameToLibrary(writerCookies, writerId, game.getId())
+        addGameToLibrary(writerCookies, writerId, requireNotNull(game.id))
 
-        val writeResult = writeReview(writerCookies, game.getId(), "Writer's Review", "Content", 4.0)
+        val writeResult = writeReview(writerCookies, requireNotNull(game.id), "Writer's Review", "Content", 4.0)
         val reviewId =
             om
                 .readTree(writeResult.response.contentAsString)
@@ -563,9 +563,9 @@ class ApiV1ReviewControllerTest {
         val memberId = requireNotNull(memberRepository.findByEmail(email)).id
 
         val game = createTestGame()
-        addGameToLibrary(cookies, memberId, game.getId())
+        addGameToLibrary(cookies, memberId, requireNotNull(game.id))
 
-        val writeResult = writeReview(cookies, game.getId(), "To Delete", "Content", 4.0)
+        val writeResult = writeReview(cookies, requireNotNull(game.id), "To Delete", "Content", 4.0)
         val reviewId =
             om
                 .readTree(writeResult.response.contentAsString)
@@ -607,9 +607,9 @@ class ApiV1ReviewControllerTest {
         val otherCookies = loginAndGetCookies(otherEmail, "1234")
 
         val game = createTestGame()
-        addGameToLibrary(writerCookies, writerId, game.getId())
+        addGameToLibrary(writerCookies, writerId, requireNotNull(game.id))
 
-        val writeResult = writeReview(writerCookies, game.getId(), "Writer's Review", "Content", 4.0)
+        val writeResult = writeReview(writerCookies, requireNotNull(game.id), "Writer's Review", "Content", 4.0)
         val reviewId =
             om
                 .readTree(writeResult.response.contentAsString)
