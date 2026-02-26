@@ -4,6 +4,7 @@ import com.back.domain.game.game.entity.Game;
 import com.back.domain.game.recommendation.dto.GameRecommendationResponse;
 import com.back.domain.game.recommendation.repository.GameVectorRepository;
 import com.back.domain.game.recommendation.repository.MemberVectorRepository;
+import com.back.domain.member.member.entity.Member;
 import com.back.domain.member.memberGame.entity.MemberGame;
 import com.back.domain.member.memberGame.repository.MemberGameRepository;
 import com.back.global.exception.ServiceException;
@@ -79,8 +80,9 @@ class GameRecommendationServiceTest {
         void ownedGames_areExcluded() {
             Game game1 = Game.builder().id(10).igdbId(100).name("G1").summary("").build();
             Game game2 = Game.builder().id(20).igdbId(200).name("G2").summary("").build();
-            MemberGame mg1 = new MemberGame(1L, 0, false, null, null, game1);
-            MemberGame mg2 = new MemberGame(1L, 0, false, null, null, game2);
+            Member member = new Member(1, "test@test.com", "tester");
+            MemberGame mg1 = new MemberGame(1L, 0, false, null, member, game1);
+            MemberGame mg2 = new MemberGame(1L, 0, false, null, member, game2);
 
             when(memberVectorRepository.getProfileVectorString(MEMBER_ID)).thenReturn("[1.0]");
             when(memberGameRepository.findAllByMemberId(MEMBER_ID)).thenReturn(List.of(mg1, mg2));
