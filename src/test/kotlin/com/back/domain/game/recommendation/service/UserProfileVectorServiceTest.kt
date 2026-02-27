@@ -5,6 +5,7 @@ import com.back.domain.game.game.entity.Game
 import com.back.domain.game.gameLike.repository.GameLikeRepository
 import com.back.domain.game.recommendation.repository.GameVectorRepository
 import com.back.domain.game.recommendation.repository.MemberVectorRepository
+import com.back.domain.member.member.entity.Member
 import com.back.domain.member.memberGame.StatusEnum
 import com.back.domain.member.memberGame.entity.MemberGame
 import com.back.domain.member.memberGame.repository.MemberGameRepository
@@ -395,9 +396,9 @@ class UserProfileVectorServiceTest {
         playtime: Double,
         review: Review?,
     ): MemberGame {
-        val mg = MemberGame(1L, playtime, favorite, status, null, game)
+        val mg = MemberGame(1L, playtime, favorite, status, Member(1, "test@test.com", "tester"), game)
         if (review != null) {
-            mg.setReview(review)
+            mg.review = review
         }
         return mg
     }

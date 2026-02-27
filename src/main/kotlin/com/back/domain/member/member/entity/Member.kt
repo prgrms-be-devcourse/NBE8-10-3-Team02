@@ -61,7 +61,7 @@ class Member(
         platformId: Long,
         playtime: Double,
         isFavorite: Boolean,
-        status: StatusEnum,
+        status: StatusEnum?,
         game: Game,
     ): MemberGame {
         val memberGame = MemberGame(platformId, playtime, isFavorite, status, this, game)
