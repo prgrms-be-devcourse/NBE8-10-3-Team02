@@ -179,7 +179,11 @@ class PostService(
         post.increaseView()
     }
 
-    fun handlePostViewCount(postId: Int, request: HttpServletRequest, response: HttpServletResponse) {
+    fun handlePostViewCount(
+        postId: Int,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ) {
         // 1. 모든 쿠키 중 "postView" 이름을 가진 쿠키를 찾음
         val cookies = request.cookies
         val viewCookie = cookies?.find { it.name == "postView" }
@@ -195,12 +199,13 @@ class PostService(
             val newValue = (viewCookie?.value ?: "") + "[$postId]"
 
             // 4. 쿠키 설정 (Path와 MaxAge가 매우 중요!)
-            val newCookie = Cookie("postView", newValue).apply {
-                path = "/"              // 서비스 전체에서 쿠키가 유지되도록 설정
-                maxAge = 60 * 60 * 24   // 24시간
-                isHttpOnly = true       // 보안 설정
-                // secure = true        // HTTPS 환경이라면 추가
-            }
+            val newCookie =
+                Cookie("postView", newValue).apply {
+                    path = "/" // 서비스 전체에서 쿠키가 유지되도록 설정
+                    maxAge = 60 * 60 * 24 // 24시간
+                    isHttpOnly = true // 보안 설정
+                    // secure = true        // HTTPS 환경이라면 추가
+                }
 
             response.addCookie(newCookie)
             println("조회수 증가 완료: $postId, 현재 쿠키: $newValue") // 디버깅용 로그
@@ -208,6 +213,4 @@ class PostService(
             println("이미 방문한 게시글입니다: $postId")
         }
     }
-
-
 }

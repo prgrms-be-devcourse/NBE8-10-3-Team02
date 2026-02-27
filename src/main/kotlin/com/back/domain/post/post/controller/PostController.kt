@@ -8,7 +8,6 @@ import com.back.domain.post.post.service.PostService
 import com.back.global.exception.ServiceException
 import com.back.global.rq.Rq
 import com.back.global.rsData.RsData
-import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
@@ -45,13 +44,11 @@ class PostController(
         return RsData("200-1", "게시글 목록 조회", postDtos)
     }
 
-
-
     @GetMapping("/{id}")
     fun getItem(
         @PathVariable id: Int,
         request: HttpServletRequest,
-        response: HttpServletResponse
+        response: HttpServletResponse,
     ): PostDto {
         val post =
             postService.findById(id)
@@ -129,6 +126,4 @@ class PostController(
 
         return RsData("200-1", msg, postService.getLikeCount(id))
     }
-
-
 }

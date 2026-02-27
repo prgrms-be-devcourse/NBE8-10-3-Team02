@@ -51,6 +51,7 @@ class Post(
     @Column(columnDefinition = "integer default 0", nullable = false)
     var viewCount: Int = 0
         protected set
+
     fun increaseView() {
         this.viewCount += 1
     }
@@ -92,5 +93,4 @@ class Post(
         val postTag = PostTag(this, tag)
         this.postTags.add(postTag)
     }
-
 }
