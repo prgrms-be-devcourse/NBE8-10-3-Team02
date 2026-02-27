@@ -3,8 +3,6 @@ name: Check Flyway Migration
 on:
   pull_request:
     branches: [ develop, main ]
-    paths:
-      - 'src/main/resources/db/migration/**'
 
 permissions:
   contents: read
@@ -18,7 +16,20 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check if migration files changed
+        id: check_files
+        run: |
+          MIGRATION_DIR="src/main/resources/db/migration"
+          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD -- "$MIGRATION_DIR")
+          if [ -z "$CHANGED" ]; then
+            echo "마이그레이션 파일 변경 없음 - 검사를 건너뜁니다"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Check naming convention (timestamp format)
+        if: steps.check_files.outputs.skip != 'true'
         run: |
           MIGRATION_DIR="src/main/resources/db/migration"
 
@@ -53,6 +64,7 @@ jobs:
           fi
 
       - name: Check duplicate version numbers
+        if: steps.check_files.outputs.skip != 'true'
         run: |
           MIGRATION_DIR="src/main/resources/db/migration"
 
