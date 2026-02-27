@@ -52,6 +52,10 @@ class Post(
     var viewCount: Int = 0
         protected set
 
+    fun increaseView() {
+        this.viewCount += 1
+    }
+
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     var postLikes: MutableList<PostLike> = mutableListOf()
         protected set
@@ -88,9 +92,5 @@ class Post(
     fun addTag(tag: Tag) {
         val postTag = PostTag(this, tag)
         this.postTags.add(postTag)
-    }
-
-    fun increaseViewCount() {
-        this.viewCount++
     }
 }
