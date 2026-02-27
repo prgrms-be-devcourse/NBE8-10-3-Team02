@@ -10,6 +10,9 @@ import com.back.domain.post.postComment.entity.PostComment
 import com.back.domain.post.postComment.repository.PostCommentRepository
 import com.back.domain.tag.tag.service.TagService
 import com.back.global.exception.ServiceException
+import jakarta.servlet.http.Cookie
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -58,10 +61,7 @@ class PostService(
         }
     }
 
-    fun findById(id: Int): Post? =
-        postRepository.findById(id).orElse(null)?.also {
-            it.increaseViewCount()
-        }
+    fun findById(id: Int): Post? = postRepository.findById(id).orElse(null)
 
     @Transactional(readOnly = true)
     fun search(
@@ -172,4 +172,42 @@ class PostService(
 
         return postLikeRepository.countByPost(post)
     }
+
+    @Transactional
+    fun increaseViewCount(id: Int) {
+        val post = findById(id) ?: return
+        post.increaseView()
+    }
+
+    fun handlePostViewCount(postId: Int, request: HttpServletRequest, response: HttpServletResponse) {
+        // 1. 모든 쿠키 중 "postView" 이름을 가진 쿠키를 찾음
+        val cookies = request.cookies
+        val viewCookie = cookies?.find { it.name == "postView" }
+
+        // 2. 중복 체크 (쿠키 값 예: "[1][5][10]")
+        val isAlreadyVisited = viewCookie?.value?.contains("[$postId]") ?: false
+
+        if (!isAlreadyVisited) {
+            // 중복이 아닐 때만 조회수 증가
+            increaseViewCount(postId)
+
+            // 3. 새 쿠키 값 생성
+            val newValue = (viewCookie?.value ?: "") + "[$postId]"
+
+            // 4. 쿠키 설정 (Path와 MaxAge가 매우 중요!)
+            val newCookie = Cookie("postView", newValue).apply {
+                path = "/"              // 서비스 전체에서 쿠키가 유지되도록 설정
+                maxAge = 60 * 60 * 24   // 24시간
+                isHttpOnly = true       // 보안 설정
+                // secure = true        // HTTPS 환경이라면 추가
+            }
+
+            response.addCookie(newCookie)
+            println("조회수 증가 완료: $postId, 현재 쿠키: $newValue") // 디버깅용 로그
+        } else {
+            println("이미 방문한 게시글입니다: $postId")
+        }
+    }
+
+
 }

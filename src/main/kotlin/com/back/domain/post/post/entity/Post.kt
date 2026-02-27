@@ -51,6 +51,9 @@ class Post(
     @Column(columnDefinition = "integer default 0", nullable = false)
     var viewCount: Int = 0
         protected set
+    fun increaseView() {
+        this.viewCount += 1
+    }
 
     @OneToMany(mappedBy = "post", cascade = [CascadeType.ALL], orphanRemoval = true)
     var postLikes: MutableList<PostLike> = mutableListOf()
@@ -90,7 +93,4 @@ class Post(
         this.postTags.add(postTag)
     }
 
-    fun increaseViewCount() {
-        this.viewCount++
-    }
 }
