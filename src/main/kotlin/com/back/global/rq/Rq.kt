@@ -5,12 +5,14 @@ import com.back.global.security.SecurityUser
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.context.annotation.RequestScope
 
 @Component
 @RequestScope // 매 요청마다 새 객체를 생성하여 스레드 간 충돌 방지
+@ConditionalOnWebApplication
 class Rq(
     private val req: HttpServletRequest,
     private val resp: HttpServletResponse,
