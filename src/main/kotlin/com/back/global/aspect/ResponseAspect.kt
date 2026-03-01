@@ -5,12 +5,10 @@ import jakarta.servlet.http.HttpServletResponse
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.stereotype.Component
 
 @Aspect
 @Component
-@ConditionalOnWebApplication
 class ResponseAspect(
     private val response: HttpServletResponse,
 ) {

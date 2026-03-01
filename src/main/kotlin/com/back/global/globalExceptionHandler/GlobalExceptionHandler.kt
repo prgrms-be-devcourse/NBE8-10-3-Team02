@@ -9,12 +9,10 @@ import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingRequestHeaderException
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
-@ConditionalOnWebApplication
 class GlobalExceptionHandler {
     @ExceptionHandler(NoSuchElementException::class)
     fun handle(ex: NoSuchElementException): ResponseEntity<RsData<Void>> =
