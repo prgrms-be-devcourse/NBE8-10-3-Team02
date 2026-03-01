@@ -18,6 +18,14 @@ resource "aws_cloudwatch_log_group" "batch" {
 }
 
 # ──────────────────────────────────────────
+# Secrets Manager - GHCR 인증 정보
+# aws secretsmanager create-secret 으로 미리 생성 필요
+# ──────────────────────────────────────────
+data "aws_secretsmanager_secret" "ghcr" {
+  name = "ghcr-credentials"
+}
+
+# ──────────────────────────────────────────
 # IAM - ECS Task Execution Role
 # 이미지 pull, CloudWatch 로그 쓰기 권한
 # ──────────────────────────────────────────
@@ -39,6 +47,21 @@ resource "aws_iam_role_policy_attachment" "ecs_execution" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
+# GHCR 인증 시크릿 읽기 권한
+resource "aws_iam_role_policy" "ecs_execution_secrets" {
+  name = "${var.project_name}-ecs-execution-secrets-policy"
+  role = aws_iam_role.ecs_execution.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+      Action   = ["secretsmanager:GetSecretValue"]
+      Resource = [data.aws_secretsmanager_secret.ghcr.arn]
+    }]
+  })
+}
+
 # ──────────────────────────────────────────
 # ECS Task Definition (Batch)
 # 같은 Docker 이미지, batch 프로파일로 실행
@@ -54,6 +77,11 @@ resource "aws_ecs_task_definition" "batch" {
   container_definitions = jsonencode([{
     name  = "batch"
     image = var.docker_image
+
+    # GHCR private 이미지 pull 인증
+    repositoryCredentials = {
+      credentialsParameter = data.aws_secretsmanager_secret.ghcr.arn
+    }
 
     # 앱 시작 시 배치 job 자동 실행 후 컨테이너 종료
     # (application-batch.yml: web-application-type: none, job.enabled: true)
