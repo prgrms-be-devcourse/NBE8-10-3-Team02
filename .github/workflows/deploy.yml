@@ -107,7 +107,7 @@ jobs:
             # - 인증서 없고 conf 있으면: 기존 conf 유지
             mkdir -p /home/ec2-user/nginx/conf.d /var/www/certbot
             CERT=/etc/letsencrypt/live/ggs-back.duckdns.org/fullchain.pem
-            if [ -f "$CERT" ]; then
+            if sudo test -f "$CERT"; then
               {
                 echo 'server {'
                 echo '    listen 80;'
