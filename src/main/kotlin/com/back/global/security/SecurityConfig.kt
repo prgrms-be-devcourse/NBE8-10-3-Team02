@@ -2,7 +2,6 @@ package com.back.global.security
 
 import com.back.global.rsData.RsData
 import com.back.standard.util.Ut
-import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -17,7 +16,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@ConditionalOnWebApplication
 class SecurityConfig(
     private val customAuthenticationFilter: CustomAuthenticationFilter,
 ) {

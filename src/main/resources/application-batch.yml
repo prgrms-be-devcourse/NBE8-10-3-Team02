@@ -1,10 +1,6 @@
 spring:
-  main:
-    # 웹 서버 비활성화 → 배치 job 완료 후 앱이 자동 종료됨
-    # Fargate 컨테이너가 job 끝나면 스스로 내려감
-    web-application-type: none
   batch:
     job:
-      enabled: true  # 앱 시작 시 job 자동 실행 (EventBridge가 스케줄 담당)
+      enabled: false  # ApplicationRunner(BatchJobRunner)가 직접 실행하므로 자동 실행 비활성화
     jdbc:
       initialize-schema: always
