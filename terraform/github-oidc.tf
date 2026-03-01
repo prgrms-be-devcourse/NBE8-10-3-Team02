@@ -67,7 +67,9 @@ resource "aws_iam_role_policy" "github_actions_ecs" {
           "ecs:DescribeTaskDefinition",
           "ecs:RegisterTaskDefinition",
         ]
-        Resource = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/${var.project_name}-batch:*"]
+        # DescribeTaskDefinition, RegisterTaskDefinition은 AWS에서
+        # 리소스 레벨 권한 미지원 → * 필수
+        Resource = ["*"]
       },
       {
         # RegisterTaskDefinition 시 execution role을 넘기기 위해 필요
