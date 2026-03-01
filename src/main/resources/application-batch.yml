@@ -8,3 +8,8 @@ spring:
       enabled: true  # 앱 시작 시 job 자동 실행 (EventBridge가 스케줄 담당)
     jdbc:
       initialize-schema: always
+  autoconfigure:
+    exclude:
+      # 웹 레이어 없으므로 Security 자동 설정 제외
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
