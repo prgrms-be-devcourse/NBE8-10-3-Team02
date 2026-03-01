@@ -42,6 +42,13 @@ src/main/generated/
 ### Kotlin/IDE local artifacts ###
 .kotlin/
 
+### Terraform ###
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/terraform.tfvars
+terraform/.terraform.lock.hcl
+
 ### Custom ###
 db_dev.mv.db
 db_dev.trace.db

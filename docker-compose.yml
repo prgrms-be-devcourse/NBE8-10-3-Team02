@@ -1,4 +1,15 @@
 services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - proxy
+    restart: unless-stopped
+
   app:
     image: ghcr.io/prgrms-be-devcourse/nbe8-10-2-team02:latest
     container_name: back-app
@@ -11,10 +22,15 @@ services:
       IGDB_CLIENT_ID: ${IGDB_CLIENT_ID}
       IGDB_CLIENT_SECRET: ${IGDB_CLIENT_SECRET}
       DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-    ports:
-      - "127.0.0.1:8080:8080"
-    restart: on-failure
+    networks:
+      - proxy
+    restart: unless-stopped
     deploy:
       resources:
         limits:
           memory: 768M
+
+networks:
+  proxy:
+    name: proxy
+    driver: bridge

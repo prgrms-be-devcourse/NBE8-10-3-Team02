@@ -4,10 +4,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.batch.core.Job
 import org.springframework.batch.core.JobParametersBuilder
 import org.springframework.batch.core.launch.JobLauncher
+import org.springframework.context.annotation.Profile
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("!batch") // Fargate(batch profile)에서는 EventBridge가 스케줄 담당
 class BatchScheduler(
     private val jobLauncher: JobLauncher,
     private val igdbSyncJob: Job,
