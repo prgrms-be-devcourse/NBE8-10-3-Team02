@@ -59,9 +59,9 @@ resource "aws_ecs_task_definition" "batch" {
     # (application-batch.yml: web-application-type: none, job.enabled: true)
     environment = [
       { name = "SPRING_PROFILES_ACTIVE",        value = "prod,batch" },
-      { name = "SPRING_DATASOURCE_URL",          value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}" },
-      { name = "SPRING_DATASOURCE_USERNAME",     value = var.db_username },
-      { name = "SPRING_DATASOURCE_PASSWORD",     value = var.db_password },
+      { name = "DB_URL",                         value = "jdbc:postgresql://${aws_db_instance.postgres.address}:5432/${var.db_name}" },
+      { name = "DB_USERNAME",                    value = var.db_username },
+      { name = "DB_PASSWORD",                    value = var.db_password },
       { name = "JWT_SECRET_KEY",                 value = var.jwt_secret_key },
       { name = "IGDB_CLIENT_ID",                 value = var.igdb_client_id },
       { name = "IGDB_CLIENT_SECRET",             value = var.igdb_client_secret },
