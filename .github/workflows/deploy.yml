@@ -197,9 +197,9 @@ jobs:
               --restart no \
               -m 768m \
               -e SPRING_PROFILES_ACTIVE="prod,api" \
-              -e SPRING_DATASOURCE_URL="${{ secrets.SPRING_DATASOURCE_URL }}" \
-              -e SPRING_DATASOURCE_USERNAME="${{ secrets.DB_USERNAME }}" \
-              -e SPRING_DATASOURCE_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e DB_URL="${{ secrets.DB_URL }}" \
+              -e DB_USERNAME="${{ secrets.DB_USERNAME }}" \
+              -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
               -e JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}" \
               -e IGDB_CLIENT_ID="${{ secrets.IGDB_CLIENT_ID }}" \
               -e IGDB_CLIENT_SECRET="${{ secrets.IGDB_CLIENT_SECRET }}" \
