@@ -8,6 +8,6 @@ import jakarta.validation.constraints.NotNull
 data class ReviewWriteRequest(
     @field:NotBlank val title: String,
     @field:NotBlank val content: String,
-    @field:NotNull @field:DecimalMin("0") @field:DecimalMax("5") val rating: Double,
+    @field:NotNull @field:DecimalMin("0") @field:DecimalMax("10") val rating: Double,
     @field:NotNull val gameId: Long,
 )

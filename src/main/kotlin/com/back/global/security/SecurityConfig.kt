@@ -59,6 +59,9 @@ class SecurityConfig(
 
                 // 3. 인증 관련 API 허용
                 authorize("/api/v1/auth/**", permitAll)
+
+                // Steam OpenID callback (Steam에서 비인증 리다이렉트)
+                authorize("/api/v1/steam/auth/**", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/members/check-nickname", permitAll)
                 authorize(HttpMethod.GET, "/api/v1/auth/check-email", permitAll)
 
