@@ -2,6 +2,7 @@ package com.back.global.globalExceptionHandler
 
 import com.back.global.exception.ServiceException
 import com.back.global.rsData.RsData
+import com.back.global.steam.exception.SteamApiException
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.ConstraintViolationException
 import org.springframework.http.HttpStatus
@@ -60,6 +61,13 @@ class GlobalExceptionHandler {
         ResponseEntity(
             RsData("400-1", "필수 헤더가 누락되었습니다: ${ex.headerName}"),
             HttpStatus.BAD_REQUEST,
+        )
+
+    @ExceptionHandler(SteamApiException::class)
+    fun handle(ex: SteamApiException): ResponseEntity<RsData<Void>> =
+        ResponseEntity(
+            RsData("503-1", "Steam 서비스 연결에 실패했습니다."),
+            HttpStatus.SERVICE_UNAVAILABLE,
         )
 
     @ExceptionHandler(ServiceException::class)

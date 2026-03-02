@@ -55,6 +55,9 @@ interface GameRepository : JpaRepository<Game, Long> {
     @Query("SELECT MAX(g.lastFetchedAt) FROM Game g")
     fun findMaxLastFetchedAt(): Optional<Instant>
 
+    // Import: 이름 부분 일치 검색 (로컬 DB 우선 매칭)
+    fun findByNameIgnoreCaseContaining(name: String): List<Game>
+
     // IGDB fallback: 이름 ILIKE 검색 (Circuit Breaker fallback 용)
     @Query("SELECT g FROM Game g WHERE LOWER(g.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY g.likeCount DESC")
     fun findByNameContainingIgnoreCaseLimited(
