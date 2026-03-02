@@ -12,7 +12,7 @@ export const options = {
     },
 };
 
-const BASE_URL = 'http://localhost:8080/api/v1';
+const BASE_URL = 'https://ggs-back.duckdns.org/api/v1';
 
 // --- 헬퍼 함수: 유저의 '생각 시간' 시뮬레이션 ---
 function thinkTime() {
