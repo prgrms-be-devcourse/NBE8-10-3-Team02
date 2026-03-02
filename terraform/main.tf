@@ -19,7 +19,7 @@ terraform {
 
 provider "aws" {
   region  = var.aws_region
-  profile = "default" # aws sso login 후 사용
+  profile = "default" # aws configure 로 IAM 자격증명 설정 후 사용
 
   default_tags {
     tags = {
@@ -28,5 +28,4 @@ provider "aws" {
   }
 }
 
-# 계정 ID 조회 (EventBridge에서 최신 task definition ARN 구성 시 사용)
 data "aws_caller_identity" "current" {}
