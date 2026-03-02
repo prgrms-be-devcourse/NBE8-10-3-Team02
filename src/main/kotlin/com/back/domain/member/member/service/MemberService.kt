@@ -4,6 +4,7 @@ import com.back.domain.member.auth.service.AuthTokenService
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.global.exception.ServiceException
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,6 +17,7 @@ class MemberService(
 ) {
     fun findByEmail(email: String): Member? = memberRepository.findByEmail(email)
 
+    @Cacheable(cacheNames = ["apiKeys"], key = "#apiKey")
     fun findByApiKey(apiKey: String): Member? = memberRepository.findByApiKey(apiKey)
 
     fun findById(id: Int): Member? = memberRepository.findById(id).orElse(null)
