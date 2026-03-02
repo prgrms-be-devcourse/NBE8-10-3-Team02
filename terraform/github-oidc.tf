@@ -52,23 +52,27 @@ resource "aws_iam_role" "github_actions" {
 
 # ──────────────────────────────────────────
 # GitHub Actions 최소 권한 정책
-# EC2 Blue-Green 배포에 필요한 것만 허용
+# ECS Task Definition 업데이트에 필요한 것만 허용
 # ──────────────────────────────────────────
-resource "aws_iam_role_policy" "github_actions_deploy" {
-  name = "${var.project_name}-github-actions-deploy-policy"
+resource "aws_iam_role_policy" "github_actions_ecs" {
+  name = "${var.project_name}-github-actions-ecs-policy"
   role = aws_iam_role.github_actions.id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        # SSM SendCommand: EC2에 docker pull/run 명령 원격 실행
         Effect = "Allow"
         Action = [
-          "ssm:SendCommand",
-          "ssm:GetCommandInvocation",
+          "ecs:DescribeTaskDefinition",
+          "ecs:RegisterTaskDefinition",
         ]
         Resource = ["*"]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["iam:PassRole"]
+        Resource = [aws_iam_role.ecs_execution.arn]
       }
     ]
   })
