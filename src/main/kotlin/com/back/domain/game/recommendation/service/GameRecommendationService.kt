@@ -60,7 +60,9 @@ class GameRecommendationService(
         igdbId: Long,
         limit: Int,
     ): List<GameRecommendationResponse> {
-        val results = gameVectorRepository.findSimilarGamesByIgdbId(igdbId, limit)
+        val targetVector = gameVectorRepository.findFeatureVectorByIgdbId(igdbId)
+            ?: return emptyList()
+        val results = gameVectorRepository.findSimilarGamesByIgdbId(targetVector, igdbId, limit)
         return results
             .map { toRecommendationWithHybridScoreForIgdb(it) }
             .sortedByDescending { it.score }

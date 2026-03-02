@@ -137,12 +137,14 @@ class GameRecommendationServiceTest {
         @Test
         fun `유사 게임 결과를 하이브리드 스코어 내림차순으로 반환한다`() {
             val igdbId = 999L
+            val targetVector = "[1.0,0.0]"
             val rows =
                 listOf(
                     row(1, "GameA", "cover1", 90.0, 500L, 0.85),
                     row(2, "GameB", "cover2", 60.0, 100L, 0.90),
                 )
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(igdbId, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(igdbId)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, igdbId, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(igdbId, 10)
 
@@ -151,8 +153,8 @@ class GameRecommendationServiceTest {
         }
 
         @Test
-        fun `결과가 비어있으면 빈 리스트를 반환한다`() {
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(999L, 10)).thenReturn(listOf())
+        fun `벡터가 없으면 빈 리스트를 반환한다`() {
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(999L)).thenReturn(null)
 
             val results = service.getSimilarGames(999L, 10)
 
@@ -162,6 +164,8 @@ class GameRecommendationServiceTest {
 
     @Nested
     inner class `하이브리드 스코어 계산` {
+        private val targetVector = "[1.0,0.0]"
+
         @Test
         fun `공식 - 0_7×similarity + 0_2×(rating÷100) + 0_1×(log1p(likeCount)÷10)`() {
             val similarity = 0.85
@@ -169,7 +173,8 @@ class GameRecommendationServiceTest {
             val likeCount = 100L
 
             val rows = listOf(row(1, "Test", "cover", rating, likeCount, similarity))
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(1L, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(1L)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, 1L, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(1L, 10)
 
@@ -183,7 +188,8 @@ class GameRecommendationServiceTest {
         fun `rating이 null이면 0으로 처리한다`() {
             val similarity = 0.9
             val rows = listOf(rowWithNulls(1, "Test", null, null, 0L, similarity))
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(1L, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(1L)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, 1L, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(1L, 10)
 
@@ -195,7 +201,8 @@ class GameRecommendationServiceTest {
         fun `likeCount가 null이면 0으로 처리한다`() {
             val similarity = 0.9
             val rows = listOf(rowWithNulls(1, "Test", null, 80.0, null, similarity))
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(1L, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(1L)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, 1L, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(1L, 10)
 
@@ -210,7 +217,8 @@ class GameRecommendationServiceTest {
                     row(1, "HighSim", null, 50.0, 50L, 0.95),
                     row(2, "LowSim", null, 50.0, 50L, 0.30),
                 )
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(1L, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(1L)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, 1L, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(1L, 10)
 
@@ -228,7 +236,8 @@ class GameRecommendationServiceTest {
                     row(1, "LowRate", null, 20.0, 0L, 0.80),
                     row(2, "HighRate", null, 100.0, 0L, 0.80),
                 )
-            whenever(gameVectorRepository.findSimilarGamesByIgdbId(1L, 10)).thenReturn(rows)
+            whenever(gameVectorRepository.findFeatureVectorByIgdbId(1L)).thenReturn(targetVector)
+            whenever(gameVectorRepository.findSimilarGamesByIgdbId(targetVector, 1L, 10)).thenReturn(rows)
 
             val results = service.getSimilarGames(1L, 10)
 
