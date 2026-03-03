@@ -4,12 +4,12 @@ import com.back.domain.member.auth.service.AuthTokenService
 import com.back.domain.member.member.entity.Member
 import com.back.domain.member.member.repository.MemberRepository
 import com.back.global.exception.ServiceException
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-@Transactional(readOnly = true) // 서비스 레이어에는 가급적 Transactional을 붙여주는 것이 안전합니다.
 class MemberService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder,
@@ -17,6 +17,7 @@ class MemberService(
 ) {
     fun findByEmail(email: String): Member? = memberRepository.findByEmail(email)
 
+    @Cacheable(cacheNames = ["apiKeys"], key = "#apiKey")
     fun findByApiKey(apiKey: String): Member? = memberRepository.findByApiKey(apiKey)
 
     fun findById(id: Int): Member? = memberRepository.findById(id).orElse(null)

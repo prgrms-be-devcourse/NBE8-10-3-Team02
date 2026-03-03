@@ -58,6 +58,7 @@ class SecurityConfig(
                 authorize("/h2-console/**", permitAll)
 
                 // 3. 인증 관련 API 허용
+                authorize(HttpMethod.POST, "/api/v1/members/login", permitAll)
                 authorize("/api/v1/auth/**", permitAll)
 
                 // Steam OpenID callback (Steam에서 비인증 리다이렉트)
